@@ -1,3 +1,8 @@
+/*Tailwind + CSS Puro*/
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 #root {
     width: 100%; 
     /* Aseguramos que el contenedor de React ocupe todo el espacio disponible */

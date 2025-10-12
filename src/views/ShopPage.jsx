@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Header from '../components/Header';
 import FilterTabs from '../components/FilterTabs';
 import ProductGrid from '../components/ProductGrid';
 import ProductModal from '../components/ProductModal'; // ⬅️ Importamos la nueva modal
@@ -63,7 +62,6 @@ function ShopPage() {
 
     return (
         <div className="shop-page-container">
-            <Header />
             <div className="shop-layout-centered">
                 <div className="main-content">
                     <h1 className="main-title-centered">Productos</h1> 
