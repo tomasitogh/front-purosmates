@@ -13,7 +13,7 @@ function ShopPage() {
     const [error, setError] = useState(null);
 
     // Configuración de la API
-    const API_URL = 'http://localhost:8080/products';
+    const API_URL = `${import.meta.env.VITE_API_BASE_URL}/products`;
     const token = localStorage.getItem('authToken');
 
     // Fetch de productos desde el backend

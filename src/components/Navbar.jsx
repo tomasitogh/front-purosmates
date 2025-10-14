@@ -1,8 +1,12 @@
 //import {Link} from 'react-router-dom'
 import { useState } from 'react';
+import AuthModal from './AuthModal';
+import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -48,10 +52,32 @@ export default function Navbar() {
                   Carrito
                 </a>
               </li>
+              <li>
+                {isAuthenticated ? (
+                  <div className="flex items-center space-x-4">
+                    <span className="text-gray-700 font-medium">
+                      Hola, {user?.name || 'Usuario'}
+                    </span>
+                    <button
+                      onClick={logout}
+                      className="text-sm text-gray-600 hover:text-gray-900 transition"
+                    >
+                      Cerrar sesión
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setIsAuthModalOpen(true)}
+                    className="text-gray-700 hover:text-gray-900 transition"
+                  >
+                    Login
+                  </button>
+                )}
+              </li>
             </ul>
             <a 
               href="./catalogo.html" 
-              className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition font-medium"
+              className="bg-[#D4AF37] text-[#2d5d52] px-6 py-2 rounded-lg hover:bg-[#DAA520] transition font-semibold"
             >
               Comprar Ahora
             </a>
@@ -91,9 +117,31 @@ export default function Navbar() {
               </a>
             </li>
             <li>
+              {isAuthenticated ? (
+                <div className="space-y-2">
+                  <span className="block text-gray-700 font-medium">
+                    Hola, {user?.name || 'Usuario'}
+                  </span>
+                  <button
+                    onClick={logout}
+                    className="block text-sm text-gray-600 hover:text-gray-900 transition"
+                  >
+                    Cerrar sesión
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="block text-gray-700 hover:text-gray-900 transition"
+                >
+                  Login
+                </button>
+              )}
+            </li>
+            <li>
               <a 
                 href="./catalogo.html" 
-                className="block bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition font-medium text-center"
+                className="block bg-[#D4AF37] text-[#2d5d52] px-6 py-2 rounded-lg hover:bg-[#DAA520] transition font-semibold text-center"
               >
                 Comprar Ahora
               </a>
@@ -101,6 +149,12 @@ export default function Navbar() {
           </ul>
         </div>
       </nav>
+
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+      />
     </header>
   );
 }

@@ -127,7 +127,7 @@ button:focus-visible {
 
 .mate-info .mate-price {
     font-size: 1em;
-    color: #4CAF50; /* Color verde de acento para el precio */
+    color: #2d5d52; /* Color verde oscuro para el precio */
     font-weight: bold;
 }
 
@@ -165,19 +165,19 @@ button:focus-visible {
 }
 
 .filter-item:hover {
-    color: #4CAF50; /* Resaltado verde al pasar el mouse */
+    color: #2d5d52; /* Resaltado verde oscuro al pasar el mouse */
 }
 
 /* Estado Activo: el más importante para el diseño */
 .filter-item.active {
-    color: #4CAF50; /* Texto de color verde fuerte */
+    color: #2d5d52; /* Texto de color verde oscuro */
     font-weight: 700; /* Negrita para destacarlo */
     /* Quitamos el color de fondo para mantener el look limpio */
     background-color: transparent; 
 }
 
 .filter-item .chevron {
-    color: #4CAF50; /* Flecha de color verde */
+    color: #2d5d52; /* Flecha de color verde oscuro */
     font-size: 0.8em;
 }
 
@@ -206,9 +206,9 @@ button:focus-visible {
 }
 
 .pagination-controls button.active {
-    background-color: #4CAF50; /* Fondo verde del número activo */
+    background-color: #2d5d52; /* Fondo verde oscuro del número activo */
     color: white;
-    border-color: #4CAF50;
+    border-color: #2d5d52;
 }
 
 
@@ -218,7 +218,7 @@ button:focus-visible {
 
 .main-header {
     /* Color de fondo verde oscuro de la referencia */
-    background-color: #2D584F; 
+    background-color: #2d5d52; 
     padding: 15px 0; /* Espacio arriba y abajo */
     color: white; 
 }
@@ -243,7 +243,7 @@ button:focus-visible {
 .logo-icon {
     /* El ícono triangular verde que se ve en la referencia */
     font-size: 1.5em;
-    color: #8FC743; /* Verde claro de acento */
+    color: rgba(45, 93, 82, 0.9); /* Verde un poco más claro */
     transform: rotate(180deg); /* Gira el ▲ para que parezca un logo */
 }
 
@@ -270,14 +270,14 @@ button:focus-visible {
 }
 
 .nav-link:hover {
-    color: #8FC743; /* Resaltado de color verde claro */
+    color: rgba(45, 93, 82, 0.9); /* Resaltado de color verde más claro */
 }
 
 /* 3. Estilos del BOTÓN PRINCIPAL (Comprar Ahora) */
 .btn-primary {
-    /* Color de fondo verde claro para que destaque */
-    background-color: #8FC743; 
-    color: #2D584F; /* Texto oscuro para contraste */
+    /* Color dorado para que destaque */
+    background-color: #D4AF37; 
+    color: #2d5d52; /* Texto oscuro para contraste */
     border: none;
     padding: 8px 18px;
     font-weight: 600;
@@ -289,7 +289,7 @@ button:focus-visible {
 }
 
 .btn-primary:hover {
-    background-color: #A3D463; 
+    background-color: #DAA520; 
 }
 
 .main-content {
@@ -336,9 +336,9 @@ button:focus-visible {
 
 .filter-tab-button.active {
     /* Estilo activo (verde sutil) */
-    background-color: #F0FAF0; 
-    color: #2D584F; 
-    border-color: #4CAF50;
+    background-color: rgba(45, 93, 82, 0.1); 
+    color: #2d5d52; 
+    border-color: #2d5d52;
     font-weight: 600;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
 }
@@ -452,7 +452,7 @@ button:focus-visible {
 }
 
 .thumbnail-item:hover, .thumbnail-item.active {
-    border-color: #4CAF50; /* Borde verde para la miniatura activa/hover */
+    border-color: #2d5d52; /* Borde verde oscuro para la miniatura activa/hover */
 }
 
 .product-info-section {
@@ -481,7 +481,7 @@ button:focus-visible {
 .product-detail-price {
     font-size: 1.6em;
     font-weight: bold;
-    color: #4CAF50;
+    color: #2d5d52;
     margin-bottom: 25px;
 }
 
@@ -492,7 +492,7 @@ button:focus-visible {
 }
 
 .add-to-cart-btn {
-    background-color: #4CAF50; /* Verde principal */
+    background-color: #2d5d52; /* Verde oscuro principal */
     color: white;
     border: none;
     padding: 12px 25px;
@@ -505,13 +505,13 @@ button:focus-visible {
 }
 
 .add-to-cart-btn:hover {
-    background-color: #43A047;
+    background-color: rgba(45, 93, 82, 0.9);
 }
 
 .buy-now-btn {
-    background-color: #f0f0f0;
-    color: #333;
-    border: 1px solid #ccc;
+    background-color: #D4AF37;
+    color: #2d5d52;
+    border: 1px solid #D4AF37;
     padding: 12px 25px;
     border-radius: 6px;
     font-size: 1.05em;
@@ -522,7 +522,7 @@ button:focus-visible {
 }
 
 .buy-now-btn:hover {
-    background-color: #e0e0e0;
+    background-color: #DAA520;
 }
 
 /* 🟢 MEDIA QUERIES para responsividad de la modal 🟢 */
