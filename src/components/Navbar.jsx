@@ -2,11 +2,13 @@
 import { useState } from 'react';
 import AuthModal from './AuthModal';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from "../context/CartContext";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
+  const { totalQty, setOpen } = useCart();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -45,12 +47,19 @@ export default function Navbar() {
                 </a>
               </li>
               <li>
-                <a 
-                  href="./carrito.html" 
-                  className="text-gray-700 hover:text-gray-900 transition"
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(true); }}
+                  className="relative text-gray-700 hover:text-gray-900 transition"
+                  aria-label="Abrir carrito"
                 >
-                  Carrito
-                </a>
+                  🛒 Carrito
+                  {totalQty > 0 && (
+                    <span className="absolute -top-2 -right-3 text-xs bg-green-600 text-white rounded-full w-5 h-5 grid place-items-center">
+                      {totalQty}
+                    </span>
+                  )}
+                </button>
               </li>
               <li>
                 {isAuthenticated ? (
@@ -109,13 +118,21 @@ export default function Navbar() {
               </a>
             </li>
             <li>
-              <a 
-                href="./carrito.html" 
-                className="block text-gray-700 hover:text-gray-900 transition"
+              <button
+                type="button"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(true); }}
+                className="relative text-gray-700 hover:text-gray-900 transition"
+                aria-label="Abrir carrito"
               >
-                Carrito
-              </a>
+                🛒 Carrito
+                {totalQty > 0 && (
+                  <span className="absolute -top-2 -right-3 text-xs bg-green-600 text-white rounded-full w-5 h-5 grid place-items-center">
+                    {totalQty}
+                  </span>
+                )}
+              </button>
             </li>
+
             <li>
               {isAuthenticated ? (
                 <div className="space-y-2">
