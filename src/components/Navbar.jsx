@@ -21,7 +21,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="bg-white shadow-md">
+    <header className="bg-[#2d5d52] shadow-md">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -35,7 +35,7 @@ export default function Navbar() {
             </Link>
             <Link 
               to="/" 
-              className="text-xl font-bold text-gray-800 hover:text-gray-600 transition"
+              className="text-xl font-bold text-[#F5F5DC]-800 hover:text-white-600 transition"
             >
               PUROS MATES
             </Link>
@@ -47,7 +47,7 @@ export default function Navbar() {
               <li>
                 <Link 
                   to="/" 
-                  className="text-gray-700 hover:text-gray-900 transition"
+                  className="text-white-700 hover:text-beige-900 transition"
                 >
                   Productos
                 </Link>
@@ -85,7 +85,7 @@ export default function Navbar() {
                     </span>
                     <button
                       onClick={handleLogout}
-                      className="text-sm text-gray-600 hover:text-gray-900 transition"
+                      className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition shadow-sm"
                     >
                       Cerrar sesión
                     </button>
@@ -93,7 +93,7 @@ export default function Navbar() {
                 ) : (
                   <button
                     onClick={() => setIsAuthModalOpen(true)}
-                    className="text-gray-700 hover:text-gray-900 transition"
+                    className="bg-[#2d5d52] text-white px-6 py-2 rounded-lg hover:bg-[#2d5d52]/90 transition shadow-sm"
                   >
                     Login
                   </button>
@@ -167,7 +167,7 @@ export default function Navbar() {
                       handleLogout();
                       setIsMenuOpen(false);
                     }}
-                    className="block text-sm text-gray-600 hover:text-gray-900 transition"
+                    className="w-full bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition shadow-sm text-center"
                   >
                     Cerrar sesión
                   </button>
@@ -178,7 +178,7 @@ export default function Navbar() {
                     setIsAuthModalOpen(true);
                     setIsMenuOpen(false);
                   }}
-                  className="block text-gray-700 hover:text-gray-900 transition"
+                  className="w-full bg-[#2d5d52] text-white px-6 py-2 rounded-lg hover:bg-[#2d5d52]/90 transition shadow-sm text-center"
                 >
                   Login
                 </button>

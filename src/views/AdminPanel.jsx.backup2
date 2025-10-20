@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import FilterTabs from '../components/FilterTabs';
-import ImageUploader from '../components/ImageUploader';
 
 function AdminPanel() {
   const { user, token, logout, isAdmin } = useAuth();
@@ -23,12 +22,11 @@ function AdminPanel() {
     price: '',
     stock: '',
     categoryId: '',
-    imageUrls: [],
   });
 
   useEffect(() => {
     if (!isAdmin()) {
-      navigate('/');
+      navigate('/login');
     } else {
       fetchProducts();
       fetchCategories();
@@ -48,25 +46,16 @@ function AdminPanel() {
 
   const fetchProducts = async () => {
     try {
-      console.log('Fetching products with token:', token ? 'Token exists' : 'No token');
-      
       const response = await fetch('http://localhost:8080/products', {
-        method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` }),
+          'Authorization': `Bearer ${token}`,
         },
       });
       
-      console.log('Fetch products response status:', response.status);
-      
       if (response.ok) {
         const data = await response.json();
-        console.log('Products fetched:', data.length);
         setProducts(data);
         setFilteredProducts(data);
-      } else {
-        console.error('Error fetching products:', response.status, response.statusText);
       }
     } catch (error) {
       console.error('Error al cargar productos:', error);
@@ -78,15 +67,14 @@ function AdminPanel() {
   const fetchCategories = async () => {
     try {
       const response = await fetch('http://localhost:8080/categories', {
-        method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` }),
+          'Authorization': `Bearer ${token}`,
         },
       });
       
       if (response.ok) {
         const data = await response.json();
+        // El endpoint devuelve un objeto con content
         const categoryList = data.content || data;
         setCategories(categoryList);
       }
@@ -111,7 +99,6 @@ function AdminPanel() {
       price: '',
       stock: '',
       categoryId: categories.length > 0 ? categories[0].id : '',
-      imageUrls: [],
     });
     setSelectedProduct(null);
     setIsEditing(false);
@@ -125,7 +112,6 @@ function AdminPanel() {
       price: product.price.toString(),
       stock: product.stock.toString(),
       categoryId: product.category?.id || '',
-      imageUrls: product.imageUrls || [],
     });
     setSelectedProduct(product);
     setIsEditing(true);
@@ -149,12 +135,6 @@ function AdminPanel() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validar que haya al menos una imagen
-    if (!formData.imageUrls || formData.imageUrls.length === 0) {
-      alert('Debes subir al menos una imagen del producto');
-      return;
-    }
-
     const productData = {
       name: formData.name,
       description: formData.description,
@@ -163,13 +143,9 @@ function AdminPanel() {
       category: {
         id: parseInt(formData.categoryId),
       },
-      imageUrls: formData.imageUrls,
     };
 
     try {
-      console.log('Submitting product:', productData);
-      console.log('Token:', token ? 'exists' : 'missing');
-      
       const url = isEditing
         ? `http://localhost:8080/products/${selectedProduct.id}`
         : 'http://localhost:8080/products';
@@ -185,20 +161,16 @@ function AdminPanel() {
         body: JSON.stringify(productData),
       });
 
-      console.log('Response status:', response.status);
-
       if (response.ok) {
         fetchProducts();
         closeModal();
         alert(isEditing ? 'Producto actualizado exitosamente' : 'Producto creado exitosamente');
       } else {
-        const errorText = await response.text();
-        console.error('Error response:', response.status, errorText);
-        alert(`Error al guardar el producto: ${response.status} - ${errorText}`);
+        alert('Error al guardar el producto');
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Error al guardar el producto: ' + error.message);
+      alert('Error al guardar el producto');
     }
   };
 
@@ -208,30 +180,22 @@ function AdminPanel() {
     }
 
     try {
-      console.log('Deleting product:', productId);
-      console.log('Token:', token ? 'exists' : 'missing');
-      
       const response = await fetch(`http://localhost:8080/products/${productId}`, {
         method: 'DELETE',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
       });
-
-      console.log('Delete response status:', response.status);
 
       if (response.ok) {
         fetchProducts();
         alert('Producto eliminado exitosamente');
       } else {
-        const errorText = await response.text();
-        console.error('Delete error:', response.status, errorText);
-        alert(`Error al eliminar el producto: ${response.status}`);
+        alert('Error al eliminar el producto');
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Error al eliminar el producto: ' + error.message);
+      alert('Error al eliminar el producto');
     }
   };
 
@@ -270,16 +234,8 @@ function AdminPanel() {
               key={product.id}
               className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition"
             >
-              <div className="h-48 bg-gray-200 flex items-center justify-center overflow-hidden">
-                {product.imageUrls && product.imageUrls.length > 0 ? (
-                  <img
-                    src={product.imageUrls[0]}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-gray-400">Sin imagen</span>
-                )}
+              <div className="h-48 bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-400">Sin imagen</span>
               </div>
               <div className="p-4">
                 <h3 className="font-semibold text-lg text-gray-900 mb-2">
@@ -346,7 +302,7 @@ function AdminPanel() {
                       required
                       value={formData.name}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2d5d52]"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                     />
                   </div>
 
@@ -359,20 +315,7 @@ function AdminPanel() {
                       value={formData.description}
                       onChange={handleInputChange}
                       rows="3"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2d5d52]"
-                    />
-                  </div>
-
-                  {/* Image Uploader */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Imágenes del Producto *
-                    </label>
-                    <ImageUploader
-                      images={formData.imageUrls}
-                      onChange={(urls) => setFormData(prev => ({ ...prev, imageUrls: urls }))}
-                      required={true}
-                      token={token}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                     />
                   </div>
 
@@ -389,7 +332,7 @@ function AdminPanel() {
                         min="0"
                         value={formData.price}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2d5d52]"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                       />
                     </div>
 
@@ -404,7 +347,7 @@ function AdminPanel() {
                         min="0"
                         value={formData.stock}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2d5d52]"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                       />
                     </div>
                   </div>
@@ -418,7 +361,7 @@ function AdminPanel() {
                       required
                       value={formData.categoryId}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2d5d52]"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                     >
                       <option value="">Selecciona una categoría</option>
                       {categories.map((category) => (
