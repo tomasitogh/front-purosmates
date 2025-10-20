@@ -1,3 +1,7 @@
+import logoPM from "../assets/logo-purosmates.png";
+import igLogo from "../assets/instagram.png";
+import wppLogo from "../assets/wpp.png";
+
 export default function Footer() {
   return (
     <footer className="bg-[#E8DCC4] text-[#3D5F54]">
@@ -9,9 +13,9 @@ export default function Footer() {
             <div className="flex items-center space-x-3 mb-4">
               <a href="./index.html">
                 <img 
-                  src="./img/favicon.ico" 
+                  src={logoPM} 
                   alt="Puros Mates Logo" 
-                  className="h-20 w-20"
+                  className="h-20 w-20 object-contain p-1"
                 />
               </a>
             </div>
@@ -89,12 +93,12 @@ export default function Footer() {
                 target="_blank" 
                 rel="noopener noreferrer"
                 aria-label="Síguenos en Instagram"
-                className="bg-white rounded-full p-3 hover:opacity-80 transition shadow-md"
+                className="hover:opacity-80 transition"
               >
                 <img 
-                  src="./img/logo-instagram.webp" 
+                  src={igLogo} 
                   alt="Instagram" 
-                  className="h-8 w-8"
+                  className="h-8 w-12 object-contain"
                 />
               </a>
               <a 
@@ -102,12 +106,12 @@ export default function Footer() {
                 target="_blank" 
                 rel="noopener noreferrer"
                 aria-label="Contáctanos por WhatsApp"
-                className="bg-white rounded-full p-3 hover:opacity-80 transition shadow-md"
+                className="hover:opacity-80 transition"
               >
                 <img 
-                  src="./img/logo-wpp.webp" 
+                  src={wppLogo} 
                   alt="WhatsApp" 
-                  className="h-8 w-8"
+                  className="h-8 w-8 object-contain"
                 />
               </a>
             </div>
@@ -120,9 +124,9 @@ export default function Footer() {
           <div className="flex flex-col items-center">
             <a href="./index.html" className="mb-4">
               <img 
-                src="./img/favicon.ico" 
+                src={logoPM} 
                 alt="Puros Mates Logo" 
-                className="h-32 w-32"
+                className="h-32 w-32 object-contain p-1"
               />
             </a>
             <a 
@@ -199,12 +203,12 @@ export default function Footer() {
                 target="_blank" 
                 rel="noopener noreferrer"
                 aria-label="Síguenos en Instagram"
-                className="bg-white rounded-full p-4 hover:opacity-80 transition shadow-md"
+                className="hover:opacity-80 transition"
               >
                 <img 
-                  src="./img/logo-instagram.webp" 
+                  src={igLogo} 
                   alt="Instagram" 
-                  className="h-10 w-10"
+                  className="h-10 w-10 object-contain"
                 />
               </a>
               <a 
@@ -212,12 +216,12 @@ export default function Footer() {
                 target="_blank" 
                 rel="noopener noreferrer"
                 aria-label="Contáctanos por WhatsApp"
-                className="bg-white rounded-full p-4 hover:opacity-80 transition shadow-md"
+                className="hover:opacity-80 transition"
               >
                 <img 
-                  src="./img/logo-wpp.webp" 
+                  src={wppLogo} 
                   alt="WhatsApp" 
-                  className="h-10 w-10"
+                  className="h-10 w-10 object-contain"
                 />
               </a>
             </div>
