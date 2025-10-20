@@ -38,10 +38,25 @@ export function CartProvider({ children }) {
   const clearCart = () => setItems([]);
 
   const totalQty = useMemo(() => items.reduce((a,b)=>a+b.qty,0), [items]);
-  const totalPrice = useMemo(() => items.reduce((a,b)=>a+(b.price||0)*b.qty,0), [items]);
+  
+  const subtotal = useMemo(() => items.reduce((a,b)=>a+(b.price||0)*b.qty,0), [items]);
+  
+  // Verificar si hay al menos un producto de cada categoría
+  const hasComboDiscount = useMemo(() => {
+    const categories = new Set(items.map(item => item.category?.description || item.category));
+    return categories.has('Mate') && categories.has('Bombilla') && categories.has('Accesorio');
+  }, [items]);
+  
+  const discount = useMemo(() => {
+    return hasComboDiscount ? subtotal * 0.10 : 0;
+  }, [hasComboDiscount, subtotal]);
+  
+  const totalPrice = useMemo(() => {
+    return subtotal - discount;
+  }, [subtotal, discount]);
 
   return (
-    <CartCtx.Provider value={{ open, setOpen, items, addToCart, decQty, removeItem, clearCart, totalQty, totalPrice }}>
+    <CartCtx.Provider value={{ open, setOpen, items, addToCart, decQty, removeItem, clearCart, totalQty, totalPrice, subtotal, discount, hasComboDiscount }}>
       {children}
     </CartCtx.Provider>
   );

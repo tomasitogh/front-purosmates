@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useEffect } from "react";
 
 export default function Carrito() {
-  const { items, removeItem, addToCart, decQty, totalPrice, totalQty } = useCart();
+  const { items, removeItem, addToCart, decQty, totalPrice, totalQty, subtotal, discount, hasComboDiscount } = useCart();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
 
@@ -90,14 +90,30 @@ export default function Carrito() {
             
             <div className="space-y-2 mb-4">
               <div className="flex justify-between text-gray-600">
-                <span>Productos ({totalQty})</span>
-                <span>${totalPrice.toFixed(2)}</span>
+                <span>Subtotal ({totalQty} productos)</span>
+                <span>${subtotal.toFixed(2)}</span>
               </div>
+              
+              {hasComboDiscount && (
+                <div className="flex justify-between text-green-600 font-semibold">
+                  <span>🎉 Descuento Combo (10%)</span>
+                  <span>-${discount.toFixed(2)}</span>
+                </div>
+              )}
+              
               <div className="flex justify-between text-gray-600">
                 <span>Envío</span>
                 <span>A calcular</span>
               </div>
             </div>
+            
+            {hasComboDiscount && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                <p className="text-sm text-green-800 font-medium">
+                  ✅ ¡Combo completo! Tienes Mate + Bombilla + Accesorio
+                </p>
+              </div>
+            )}
             
             <div className="border-t pt-4 mb-4">
               <div className="flex justify-between text-lg font-bold text-gray-800">
