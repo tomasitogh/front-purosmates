@@ -1,12 +1,14 @@
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function Carrito() {
-  const { items, removeItem, addToCart, decQty, totalPrice, totalQty, subtotal, discount, hasComboDiscount } = useCart();
+  const { items, removeItem, addToCart, decQty, totalPrice, totalQty, subtotal, discount, hasComboDiscount, clearCart } = useCart();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // Redirigir si no está autenticado
   useEffect(() => {
@@ -14,6 +16,76 @@ export default function Carrito() {
       navigate('/');
     }
   }, [isAuthenticated, navigate]);
+
+  const handleConfirmarCompra = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Debes iniciar sesión para realizar la compra');
+        navigate('/');
+        return;
+      }
+
+      // Preparar los items en el formato que espera el backend
+      const orderItems = items.map(item => ({
+        productId: item.id,
+        quantity: item.qty
+      }));
+
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(orderItems)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || 'Error al procesar la compra');
+      }
+
+      const order = await response.json();
+      
+      // Mostrar mensaje de éxito
+      setShowSuccess(true);
+      
+      // Limpiar el carrito y redirigir después de 3 segundos
+      setTimeout(() => {
+        clearCart();
+        setShowSuccess(false);
+        navigate('/');
+      }, 3000);
+
+    } catch (error) {
+      console.error('Error al confirmar compra:', error);
+      alert(error.message || 'Error al procesar la compra. Por favor intenta nuevamente.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Modal de compra exitosa (PRIMERO verificar esto)
+  if (showSuccess) {
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-8 max-w-md mx-4 text-center">
+          <div className="mb-4">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">¡Compra Exitosa!</h2>
+          <p className="text-gray-600 mb-4">Tu pedido ha sido procesado correctamente</p>
+          <p className="text-sm text-gray-500">Serás redirigido a la tienda...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (totalQty === 0) {
     return (
@@ -100,11 +172,6 @@ export default function Carrito() {
                   <span>-${discount.toFixed(2)}</span>
                 </div>
               )}
-              
-              <div className="flex justify-between text-gray-600">
-                <span>Envío</span>
-                <span>A calcular</span>
-              </div>
             </div>
             
             {hasComboDiscount && (
@@ -122,8 +189,12 @@ export default function Carrito() {
               </div>
             </div>
             
-            <button className="w-full bg-[#D4AF37] text-[#2d5d52] px-6 py-3 rounded-lg hover:bg-[#DAA520] transition font-semibold mb-3">
-              Proceder al Pago
+            <button 
+              onClick={handleConfirmarCompra}
+              disabled={loading}
+              className="w-full bg-[#D4AF37] text-[#2d5d52] px-6 py-3 rounded-lg hover:bg-[#DAA520] transition font-semibold mb-3 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Procesando...' : 'Confirmar carrito'}
             </button>
             
             <button

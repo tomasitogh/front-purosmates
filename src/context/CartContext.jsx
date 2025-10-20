@@ -15,9 +15,20 @@ export function CartProvider({ children }) {
   }, [items]);
 
   const addToCart = (product) => {
+    // Verificar si el producto tiene stock
+    if (!product.stock || product.stock <= 0) {
+      alert('Este producto no tiene stock disponible');
+      return;
+    }
+
     setItems(prev => {
       const i = prev.findIndex(p => p.id === product.id);
       if (i >= 0) {
+        // Verificar que no se exceda el stock disponible
+        if (prev[i].qty >= product.stock) {
+          alert(`Solo hay ${product.stock} unidades disponibles de este producto`);
+          return prev;
+        }
         const copy = [...prev];
         copy[i] = { ...copy[i], qty: copy[i].qty + 1 };
         return copy;

@@ -63,9 +63,18 @@ function ProductModal({ product, onClose, onAddToCart }) {
                             
                             {/* Acciones del producto */}
                             <div className="product-actions">
-                                <button className="add-to-cart-btn" onClick={() => onAddToCart(product)}>
-                                    Agregar al Carrito
-                                </button>
+                                {product.stock > 0 ? (
+                                    <button className="add-to-cart-btn" onClick={() => onAddToCart(product)}>
+                                        Agregar al Carrito
+                                    </button>
+                                ) : (
+                                    <>
+                                        <p className="text-red-600 font-semibold mb-2">Sin stock</p>
+                                        <button className="add-to-cart-btn opacity-50 cursor-not-allowed bg-gray-400" disabled>
+                                            Agregar al Carrito
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const CATEGORIES = ['Mates', 'Bombillas', 'Accesorios'];
+const CATEGORIES = ['Mate', 'Bombilla', 'Accesorio'];
 
 function FilterTabs({ selectedType, onFilterChange }) {
     return (

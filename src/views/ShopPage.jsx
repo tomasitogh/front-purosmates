@@ -69,8 +69,7 @@ function ShopPage() {
             setFilteredMates(allMates);
         } else {
             const newFilteredMates = allMates.filter(mate => 
-                mate.category.description.toLowerCase() === selectedType.toLowerCase() ||
-                mate.category.name.toLowerCase() === selectedType.toLowerCase()
+                mate.category?.description === selectedType
             );
             setFilteredMates(newFilteredMates);
         }

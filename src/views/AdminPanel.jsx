@@ -40,7 +40,7 @@ function AdminPanel() {
       setFilteredProducts(products);
     } else {
       const filtered = products.filter(
-        (product) => product.category?.name === selectedType
+        (product) => product.category?.description === selectedType
       );
       setFilteredProducts(filtered);
     }
@@ -297,7 +297,7 @@ function AdminPanel() {
                   </span>
                 </div>
                 <div className="text-xs text-gray-500 mb-4">
-                  Categoría: {product.category?.name || 'Sin categoría'}
+                  Categoría: {product.category?.description || 'Sin categoría'}
                 </div>
                 <div className="flex space-x-2">
                   <button
