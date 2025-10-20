@@ -1,9 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 function ProductModal({ product, onClose, onAddToCart }) {
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
     if (!product) {
         return null; // Si no hay producto, no renderizamos la modal
     }
+
+    const images = product.imageUrls && product.imageUrls.length > 0 
+        ? product.imageUrls 
+        : ['data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect fill="%23ddd" width="400" height="400"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%23999">Sin imagen</text></svg>'];
 
     return (
         // Contenedor principal de la modal (fondo oscuro y transparente)
@@ -20,31 +26,46 @@ function ProductModal({ product, onClose, onAddToCart }) {
                     <div className="product-details-main">
                         <div className="product-image-section">
                             {/* Imagen principal del producto */}
-                            <img src={product.imageUrl} alt={product.name} className="main-detail-image" />
+                            <img 
+                                src={images[selectedImageIndex]} 
+                                alt={product.name} 
+                                className="main-detail-image"
+                                onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect fill="%23ddd" width="400" height="400"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%23999">Error al cargar</text></svg>';
+                                }}
+                            />
                             {/* Miniaturas */}
-                            <div className="thumbnail-gallery">
-                                {/* Puedes mapear aquí imágenes adicionales si product.images existe */}
-                                <img src={product.imageUrl} alt="Thumbnail 1" className="thumbnail-item active" />
-                                {/* Ejemplo de otras miniaturas, puedes añadir más o usar un array en 'product' */}
-                                <img src="/images/calabaza2.png" alt="Thumbnail 2" className="thumbnail-item" />
-                                <img src="/images/calabaza3.png" alt="Thumbnail 3" className="thumbnail-item" />
-                            </div>
+                            {images.length > 1 && (
+                                <div className="thumbnail-gallery">
+                                    {images.map((image, index) => (
+                                        <img 
+                                            key={index}
+                                            src={image} 
+                                            alt={`${product.name} - ${index + 1}`} 
+                                            className={`thumbnail-item ${selectedImageIndex === index ? 'active' : ''}`}
+                                            onClick={() => setSelectedImageIndex(index)}
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="%23ddd" width="100" height="100"/></svg>';
+                                            }}
+                                        />
+                                    ))}
+                                </div>
+                            )}
                         </div>
                         <div className="product-info-section">
                             <h3 className="product-detail-name">{product.name}</h3>
                             <p className="product-detail-description">
-                                Mate criollo calabaza pulido con base de cuero, cuero crudo cocido
-                                {/* Puedes poner la descripción real de product aquí si existe: {product.description} */}
+                                {product.description || 'Producto de calidad premium para disfrutar del mejor mate.'}
                             </p>
-                            <p className="product-detail-price">${product.price.toLocaleString('es-AR')}</p> {/* Formato de moneda */}
+                            <p className="product-detail-price">${product.price.toLocaleString('es-AR')}</p>
                             
                             {/* Acciones del producto */}
                             <div className="product-actions">
                                 <button className="add-to-cart-btn" onClick={() => onAddToCart(product)}>
                                     Agregar al Carrito
                                 </button>
-                                {/* Botón "Comprar Ahora" (opcional, si tiene una funcionalidad distinta) */}
-                                {/* <button className="buy-now-btn">Comprar Ahora</button> */}
                             </div>
                         </div>
                     </div>

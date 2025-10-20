@@ -14,7 +14,6 @@ function ShopPage() {
 
     // Configuración de la API
     const API_URL = 'http://localhost:8080/products';
-    const token = localStorage.getItem('authToken');
 
     // Fetch de productos desde el backend
     useEffect(() => {
@@ -23,17 +22,12 @@ function ShopPage() {
                 setLoading(true);
                 setError(null);
 
-                const headers = {
-                    'Content-Type': 'application/json'
-                };
-                
-                if (token) {
-                    headers['Authorization'] = `Bearer ${token}`;
-                }
-
+                // NO enviamos token para la vista pública de productos
                 const response = await fetch(API_URL, {
                     method: 'GET',
-                    headers: headers
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
                 });
 
                 console.log('Response status:', response.status);
@@ -69,7 +63,8 @@ function ShopPage() {
             setFilteredMates(allMates);
         } else {
             const newFilteredMates = allMates.filter(mate => 
-                mate.category.description.toLowerCase() === selectedType.toLowerCase()
+                mate.category.description.toLowerCase() === selectedType.toLowerCase() ||
+                mate.category.name.toLowerCase() === selectedType.toLowerCase()
             );
             setFilteredMates(newFilteredMates);
         }

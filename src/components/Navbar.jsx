@@ -1,60 +1,105 @@
-//import {Link} from 'react-router-dom'
 import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import AuthModal from './AuthModal';
+import { useAuth } from '../context/AuthContext';
+import { useCart } from "../context/CartContext";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const { user, isAuthenticated, logout, isAdmin } = useAuth();
+  const { totalQty, setOpen } = useCart();
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   return (
-    <header className="bg-white shadow-md">
+    <header className="bg-[#2d5d52] shadow-md">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center space-x-2">
-            <a href="./index.html" className="flex items-center">
+            <Link to="/" className="flex items-center">
               <img 
                 src="./img/favicon.ico" 
                 alt="Puros Mates Logo" 
                 className="h-8 w-8"
               />
-            </a>
-            <a 
-              href="./index.html" 
-              className="text-xl font-bold text-gray-800 hover:text-gray-600 transition"
+            </Link>
+            <Link 
+              to="/" 
+              className="text-xl font-bold text-[#F5F5DC]-800 hover:text-white-600 transition"
             >
               PUROS MATES
-            </a>
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             <ul className="flex space-x-6">
               <li>
-                <a 
-                  href="./catalogo.html" 
-                  className="text-gray-700 hover:text-gray-900 transition"
+                <Link 
+                  to="/" 
+                  className="text-white-700 hover:text-beige-900 transition"
                 >
                   Productos
-                </a>
+                </Link>
               </li>
               <li>
-                <a 
-                  href="./carrito.html" 
-                  className="text-gray-700 hover:text-gray-900 transition"
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(true); }}
+                  className="relative text-gray-700 hover:text-gray-900 transition"
+                  aria-label="Abrir carrito"
                 >
-                  Carrito
-                </a>
+                  🛒 Carrito
+                  {totalQty > 0 && (
+                    <span className="absolute -top-2 -right-3 text-xs bg-green-600 text-white rounded-full w-5 h-5 grid place-items-center">
+                      {totalQty}
+                    </span>
+                  )}
+                </button>
+              </li>
+              {isAuthenticated && isAdmin() && (
+                <li>
+                  <Link 
+                    to="/admin" 
+                    className="text-gray-700 hover:text-gray-900 transition font-medium"
+                  >
+                    🔧 Panel Admin
+                  </Link>
+                </li>
+              )}
+              <li>
+                {isAuthenticated ? (
+                  <div className="flex items-center space-x-4">
+                    <span className="text-gray-700 font-medium">
+                      Hola, {user?.name || user?.email || 'Usuario'}
+                    </span>
+                    <button
+                      onClick={handleLogout}
+                      className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition shadow-sm"
+                    >
+                      Cerrar sesión
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setIsAuthModalOpen(true)}
+                    className="bg-[#2d5d52] text-white px-6 py-2 rounded-lg hover:bg-[#2d5d52]/90 transition shadow-sm"
+                  >
+                    Login
+                  </button>
+                )}
               </li>
             </ul>
-            <a 
-              href="./catalogo.html" 
-              className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition font-medium"
-            >
-              Comprar Ahora
-            </a>
           </div>
 
           {/* Mobile Menu Button */}
@@ -72,35 +117,82 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Menu */}
-        <div className={`md:hidden overflow-hidden transition-all duration-300 ${isMenuOpen ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'}`}>
+        <div className={`md:hidden overflow-hidden transition-all duration-300 ${isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
           <ul className="py-4 space-y-4">
             <li>
-              <a 
-                href="./catalogo.html" 
+              <Link 
+                to="/" 
                 className="block text-gray-700 hover:text-gray-900 transition"
+                onClick={() => setIsMenuOpen(false)}
               >
                 Productos
-              </a>
+              </Link>
             </li>
             <li>
-              <a 
-                href="./carrito.html" 
-                className="block text-gray-700 hover:text-gray-900 transition"
+              <button
+                type="button"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(true); setIsMenuOpen(false); }}
+                className="relative text-gray-700 hover:text-gray-900 transition"
+                aria-label="Abrir carrito"
               >
-                Carrito
-              </a>
+                🛒 Carrito
+                {totalQty > 0 && (
+                  <span className="absolute -top-2 -right-3 text-xs bg-green-600 text-white rounded-full w-5 h-5 grid place-items-center">
+                    {totalQty}
+                  </span>
+                )}
+              </button>
             </li>
+
+            {isAuthenticated && isAdmin() && (
+              <li>
+                <Link 
+                  to="/admin" 
+                  className="block text-gray-700 hover:text-gray-900 transition font-medium"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  🔧 Panel Admin
+                </Link>
+              </li>
+            )}
+
             <li>
-              <a 
-                href="./catalogo.html" 
-                className="block bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition font-medium text-center"
-              >
-                Comprar Ahora
-              </a>
+              {isAuthenticated ? (
+                <div className="space-y-2">
+                  <span className="block text-gray-700 font-medium">
+                    Hola, {user?.name || user?.email || 'Usuario'}
+                  </span>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition shadow-sm text-center"
+                  >
+                    Cerrar sesión
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    setIsAuthModalOpen(true);
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full bg-[#2d5d52] text-white px-6 py-2 rounded-lg hover:bg-[#2d5d52]/90 transition shadow-sm text-center"
+                >
+                  Login
+                </button>
+              )}
             </li>
           </ul>
         </div>
       </nav>
+
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+      />
     </header>
   );
 }
