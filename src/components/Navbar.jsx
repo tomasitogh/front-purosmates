@@ -1,5 +1,9 @@
 import { useState } from 'react';
+<<<<<<< Updated upstream
 import { Link, useNavigate } from 'react-router-dom';
+=======
+import { useNavigate } from 'react-router-dom';
+>>>>>>> Stashed changes
 import AuthModal from './AuthModal';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from "../context/CartContext";
@@ -7,17 +11,31 @@ import { useCart } from "../context/CartContext";
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+<<<<<<< Updated upstream
   const { user, isAuthenticated, logout, isAdmin } = useAuth();
   const { totalQty, setOpen } = useCart();
+=======
+  const { user, isAuthenticated, logout } = useAuth();
+  const { totalQty } = useCart();
+>>>>>>> Stashed changes
   const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+<<<<<<< Updated upstream
   const handleLogout = () => {
     logout();
     navigate('/');
+=======
+  const handleCartClick = () => {
+    if (!isAuthenticated) {
+      setIsAuthModalOpen(true);
+    } else {
+      navigate('/carrito');
+    }
+>>>>>>> Stashed changes
   };
 
   return (
@@ -26,12 +44,17 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center space-x-2">
+<<<<<<< Updated upstream
             <Link to="/" className="flex items-center">
+=======
+            <button onClick={() => navigate('/')} className="flex items-center focus:outline-none">
+>>>>>>> Stashed changes
               <img 
                 src="./img/favicon.ico" 
                 alt="Puros Mates Logo" 
                 className="h-8 w-8"
               />
+<<<<<<< Updated upstream
             </Link>
             <Link 
               to="/" 
@@ -39,25 +62,43 @@ export default function Navbar() {
             >
               PUROS MATES
             </Link>
+=======
+            </button>
+            <button
+              onClick={() => navigate('/')}
+              className="text-xl font-bold text-gray-800 hover:text-gray-600 transition focus:outline-none"
+            >
+              PUROS MATES
+            </button>
+>>>>>>> Stashed changes
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             <ul className="flex space-x-6">
               <li>
+<<<<<<< Updated upstream
                 <Link 
                   to="/" 
                   className="text-white-700 hover:text-beige-900 transition"
                 >
                   Productos
                 </Link>
+=======
+                <button
+                  onClick={() => navigate('/')}
+                  className="text-gray-700 hover:text-gray-900 transition focus:outline-none"
+                >
+                  Productos
+                </button>
+>>>>>>> Stashed changes
               </li>
               <li>
                 <button
                   type="button"
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(true); }}
-                  className="relative text-gray-700 hover:text-gray-900 transition"
-                  aria-label="Abrir carrito"
+                  onClick={handleCartClick}
+                  className="relative text-gray-700 hover:text-gray-900 transition focus:outline-none"
+                  aria-label="Ir al carrito"
                 >
                   🛒 Carrito
                   {totalQty > 0 && (
@@ -100,6 +141,15 @@ export default function Navbar() {
                 )}
               </li>
             </ul>
+<<<<<<< Updated upstream
+=======
+            <button
+              onClick={() => navigate('/')}
+              className="bg-[#D4AF37] text-[#2d5d52] px-6 py-2 rounded-lg hover:bg-[#DAA520] transition font-semibold focus:outline-none"
+            >
+              Comprar Ahora
+            </button>
+>>>>>>> Stashed changes
           </div>
 
           {/* Mobile Menu Button */}
@@ -120,6 +170,7 @@ export default function Navbar() {
         <div className={`md:hidden overflow-hidden transition-all duration-300 ${isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
           <ul className="py-4 space-y-4">
             <li>
+<<<<<<< Updated upstream
               <Link 
                 to="/" 
                 className="block text-gray-700 hover:text-gray-900 transition"
@@ -127,13 +178,27 @@ export default function Navbar() {
               >
                 Productos
               </Link>
+=======
+              <button
+                onClick={() => navigate('/')}
+                className="block text-gray-700 hover:text-gray-900 transition focus:outline-none text-left"
+              >
+                Productos
+              </button>
+>>>>>>> Stashed changes
             </li>
             <li>
               <button
                 type="button"
+<<<<<<< Updated upstream
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(true); setIsMenuOpen(false); }}
                 className="relative text-gray-700 hover:text-gray-900 transition"
                 aria-label="Abrir carrito"
+=======
+                onClick={handleCartClick}
+                className="relative text-gray-700 hover:text-gray-900 transition focus:outline-none"
+                aria-label="Ir al carrito"
+>>>>>>> Stashed changes
               >
                 🛒 Carrito
                 {totalQty > 0 && (
@@ -184,6 +249,17 @@ export default function Navbar() {
                 </button>
               )}
             </li>
+<<<<<<< Updated upstream
+=======
+            <li>
+              <button
+                onClick={() => navigate('/')}
+                className="block bg-[#D4AF37] text-[#2d5d52] px-6 py-2 rounded-lg hover:bg-[#DAA520] transition font-semibold text-center w-full focus:outline-none"
+              >
+                Comprar Ahora
+              </button>
+            </li>
+>>>>>>> Stashed changes
           </ul>
         </div>
       </nav>

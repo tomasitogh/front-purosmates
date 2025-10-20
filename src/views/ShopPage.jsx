@@ -2,15 +2,21 @@ import { useState, useEffect } from 'react';
 import FilterTabs from '../components/FilterTabs';
 import ProductGrid from '../components/ProductGrid';
 import ProductModal from '../components/ProductModal';
+import AuthModal from '../components/AuthModal';
+import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 function ShopPage() {
     const [allMates, setAllMates] = useState([]);
     const [filteredMates, setFilteredMates] = useState([]);
     const [selectedType, setSelectedType] = useState('All');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const { addToCart } = useCart();
+    const { isAuthenticated } = useAuth();
 
     // Configuración de la API
     const API_URL = 'http://localhost:8080/products';
@@ -81,6 +87,22 @@ function ShopPage() {
     };
 
     const handleAddToCart = (product) => {
+        // Verificar si el usuario está autenticado
+        if (!isAuthenticated) {
+            closeProductModal();
+            setIsAuthModalOpen(true);
+            return;
+        }
+
+        // Transformar el producto al formato que espera el carrito
+        const cartItem = {
+            id: product._id || product.id,
+            name: product.name,
+            price: product.price,
+            images: product.images || [product.imageUrl],
+        };
+        
+        addToCart(cartItem);
         console.log(`Producto "${product.name}" agregado al carrito!`);
         closeProductModal();
     };
@@ -131,6 +153,13 @@ function ShopPage() {
                     product={selectedProduct} 
                     onClose={closeProductModal} 
                     onAddToCart={handleAddToCart}
+                />
+            )}
+
+            {isAuthModalOpen && (
+                <AuthModal 
+                    isOpen={isAuthModalOpen}
+                    onClose={() => setIsAuthModalOpen(false)}
                 />
             )}
         </div>
