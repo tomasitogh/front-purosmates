@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import FilterTabs from '../components/FilterTabs';
+import PriceFilter from '../components/PriceFilter';
 import ProductGrid from '../components/ProductGrid';
 import ProductModal from '../components/ProductModal';
 import AuthModal from '../components/AuthModal';
@@ -11,6 +12,9 @@ function ShopPage() {
     const [allMates, setAllMates] = useState([]);
     const [filteredMates, setFilteredMates] = useState([]);
     const [selectedType, setSelectedType] = useState('All');
+    const [priceRange, setPriceRange] = useState([0, 100000]);
+    const [minPrice, setMinPrice] = useState(0);
+    const [maxPrice, setMaxPrice] = useState(100000);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
@@ -47,6 +51,16 @@ function ShopPage() {
 
                 const data = await response.json();
                 setAllMates(data);
+                
+                // Calcular precios mínimo y máximo de los productos
+                if (data.length > 0) {
+                    const prices = data.map(product => product.price);
+                    const min = Math.floor(Math.min(...prices));
+                    const max = Math.ceil(Math.max(...prices));
+                    setMinPrice(min);
+                    setMaxPrice(max);
+                    setPriceRange([min, max]);
+                }
             } catch (error) {
                 console.error('Error al cargar productos:', error);
                 setError(error.message);
@@ -63,7 +77,11 @@ function ShopPage() {
         else setSelectedType(type);
     };
 
-    // 🔎 aplicar filtros: categoría (tabs) + nombre (q)
+    const handlePriceChange = (newPriceRange) => {
+        setPriceRange(newPriceRange);
+    };
+
+    // 🔎 aplicar filtros: categoría (tabs) + nombre (q) + precio
     useEffect(() => {
         // 1) por categoría (tu lógica original)
         let list = selectedType === 'All'
@@ -77,8 +95,13 @@ function ShopPage() {
             );
         }
 
+        // 3) por rango de precio
+        list = list.filter(m => 
+            m.price >= priceRange[0] && m.price <= priceRange[1]
+        );
+
         setFilteredMates(list);
-    }, [selectedType, allMates, searchText]);
+    }, [selectedType, allMates, searchText, priceRange]);
 
     const openProductModal = (product) => {
         setSelectedProduct(product);
@@ -140,10 +163,17 @@ function ShopPage() {
             <div className="shop-layout-centered">
                 <div className="main-content">
                     <h1 className="main-title-centered">Productos</h1> 
-                    <FilterTabs 
-                        selectedType={selectedType}
-                        onFilterChange={handleFilterChange}
-                    />
+                    <div className="filters-row">
+                        <FilterTabs 
+                            selectedType={selectedType}
+                            onFilterChange={handleFilterChange}
+                        />
+                        <PriceFilter 
+                            minPrice={minPrice}
+                            maxPrice={maxPrice}
+                            onPriceChange={handlePriceChange}
+                        />
+                    </div>
                     <ProductGrid 
                         mates={filteredMates} 
                         onProductClick={openProductModal} 
