@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import AuthModal from './AuthModal';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from "../context/CartContext";
@@ -9,24 +9,43 @@ import logoPM from '../assets/logo-purosmates.png';
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  // 🔎 estado para búsqueda
+  const [q, setQ] = useState("");
+
   const { user, isAuthenticated, logout, isAdmin } = useAuth();
   const { totalQty, setOpen } = useCart();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+  // Mantener sincronizado el input con el querystring (?q=)
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    setQ(params.get("q") || "");
+  }, [location.search]);
+
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   const handleLogout = () => {
     logout();
     navigate('/');
   };
+
   const handleCartClick = () => {
     if (!isAuthenticated) {
       setIsAuthModalOpen(true);
     } else {
       navigate('/carrito');
     }
+  };
+
+  // Enviar búsqueda y quedarse en la página de productos ("/")
+  const onSearchSubmit = (e) => {
+    e.preventDefault();
+    const params = new URLSearchParams(location.search);
+    if (q.trim()) params.set("q", q.trim());
+    else params.delete("q");
+    navigate({ pathname: "/", search: params.toString() });
   };
 
   return (
@@ -56,6 +75,8 @@ export default function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-2">
             <ul className="flex items-center gap-2">
+          <div className="hidden md:flex items-center space-x-6">
+            <ul className="flex items-center space-x-6">
               <li>
                 <Link 
                   to="/" 
@@ -66,6 +87,26 @@ export default function Navbar() {
               </li>
 
               {/* Carrito: texto/borde blanco y fondo transparente */}
+              {/* 🔎 Barra de búsqueda al lado de “Productos” */}
+              <li className="flex items-center">
+                <form onSubmit={onSearchSubmit} className="flex items-center gap-2">
+                  <input
+                    type="search"
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                    placeholder="Buscar productos…"
+                    aria-label="Buscar productos"
+                    className="w-56 rounded-md border border-gray-300 px-3 py-1.5 outline-none focus:ring-2 focus:ring-[#2d5d52]"
+                  />
+                  <button
+                    type="submit"
+                    className="bg-white/10 text-white px-3 py-1.5 rounded-md hover:bg-white/20 transition"
+                  >
+                    Buscar
+                  </button>
+                </form>
+              </li>
+
               <li>
                 <button
                   type="button"
@@ -92,6 +133,7 @@ export default function Navbar() {
                   </Link>
                 </li>
               )}
+
               <li>
                 {isAuthenticated ? (
                   <div className="flex items-center space-x-4">
@@ -116,6 +158,7 @@ export default function Navbar() {
                 )}
               </li>
             </ul>
+
             <button
               onClick={() => navigate('/')}
               className="bg-[#D4AF37] text-[#2d5d52] px-6 py-2 rounded-lg hover:bg-[#DAA520] transition font-semibold focus:outline-none"
@@ -152,6 +195,28 @@ export default function Navbar() {
             </li>
 
             {/* Carrito (mobile): texto/borde blanco y fondo transparente */}
+            {/* 🔎 Búsqueda también en mobile */}
+            <li>
+              <form
+                onSubmit={(e) => { onSearchSubmit(e); setIsMenuOpen(false); }}
+                className="flex items-center gap-2"
+              >
+                <input
+                  type="search"
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder="Buscar productos…"
+                  className="flex-1 rounded-md border border-gray-300 px-3 py-2 outline-none focus:ring-2 focus:ring-[#2d5d52]"
+                />
+                <button
+                  type="submit"
+                  className="bg-[#2d5d52] text-white px-3 py-2 rounded-md"
+                >
+                  Buscar
+                </button>
+              </form>
+            </li>
+
             <li>
               <button
                 type="button"
@@ -209,9 +274,10 @@ export default function Navbar() {
                 </button>
               )}
             </li>
+
             <li>
               <button
-                onClick={() => navigate('/')}
+                onClick={() => { navigate('/'); setIsMenuOpen(false); }}
                 className="block bg-[#D4AF37] text-[#2d5d52] px-6 py-2 rounded-lg hover:bg-[#DAA520] transition font-semibold text-center w-full focus:outline-none"
               >
                 Comprar Ahora
