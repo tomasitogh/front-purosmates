@@ -11,7 +11,7 @@ export default function Footer() {
           {/* Logo Column */}
           <div className="flex flex-col items-start">
             <div className="flex items-center space-x-3 mb-4">
-              <a href="./index.html">
+              <a href="./">
                 <img 
                   src={logoPM} 
                   alt="Puros Mates Logo" 
@@ -20,7 +20,7 @@ export default function Footer() {
               </a>
             </div>
             <a 
-              href="./index.html" 
+              href="./" 
               className="text-2xl font-bold text-[#3D5F54] hover:opacity-80 transition"
             >
               PUROS MATES
@@ -29,7 +29,7 @@ export default function Footer() {
 
           {/* Products Column */}
           <div>
-            <a href="./catalogo.html">
+            <a href="./">
               <h3 className="text-[#3D5F54] text-2xl font-bold mb-6 hover:opacity-80 transition">
                 Productos
               </h3>
@@ -64,28 +64,28 @@ export default function Footer() {
 
           {/* About Column */}
           <div>
-            <a href="./index.html">
+            <a href="./">
               <h3 className="text-[#3D5F54] text-2xl font-bold mb-6 hover:opacity-80 transition">
                 Puros Mates
               </h3>
             </a>
             <ul className="space-y-3 text-lg">
-              <li>
+              {/*<li>
                 <a 
                   href="./contacto.html" 
                   className="hover:opacity-70 transition"
                 >
                   Contacto
                 </a>
-              </li>
-              <li>
+              </li>*/}
+              {/*<li>
                 <a 
                   href="./index.html" 
                   className="hover:opacity-70 transition"
                 >
                   Sobre Nosotros
                 </a>
-              </li>
+              </li>*/}
             </ul>
             <div className="flex space-x-4 mt-6">
               <a 
