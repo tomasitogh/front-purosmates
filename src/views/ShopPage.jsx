@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import FilterTabs from '../components/FilterTabs';
 import ProductGrid from '../components/ProductGrid';
 import ProductModal from '../components/ProductModal';
@@ -18,6 +19,13 @@ function ShopPage() {
     const { addToCart } = useCart();
     const { isAuthenticated } = useAuth();
 
+    // 👇 leer querystring (?q=...)
+    const location = useLocation();
+    const searchText = useMemo(() => {
+        const params = new URLSearchParams(location.search);
+        return (params.get('q') || '').trim().toLowerCase();
+    }, [location.search]);
+
     // Configuración de la API
     const API_URL = 'http://localhost:8080/products';
 
@@ -28,22 +36,16 @@ function ShopPage() {
                 setLoading(true);
                 setError(null);
 
-                // NO enviamos token para la vista pública de productos
                 const response = await fetch(API_URL, {
                     method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
+                    headers: { 'Content-Type': 'application/json' }
                 });
 
-                console.log('Response status:', response.status);
-                
                 if (!response.ok) {
                     throw new Error(`Error ${response.status}: ${response.statusText}`);
                 }
 
                 const data = await response.json();
-                console.log('Productos recibidos:', data);
                 setAllMates(data);
             } catch (error) {
                 console.error('Error al cargar productos:', error);
@@ -57,23 +59,26 @@ function ShopPage() {
     }, []);
 
     const handleFilterChange = (type) => {
-        if (selectedType === type) {
-            setSelectedType('All');
-        } else {
-            setSelectedType(type);
-        }
+        if (selectedType === type) setSelectedType('All');
+        else setSelectedType(type);
     };
 
+    // 🔎 aplicar filtros: categoría (tabs) + nombre (q)
     useEffect(() => {
-        if (selectedType === 'All') {
-            setFilteredMates(allMates);
-        } else {
-            const newFilteredMates = allMates.filter(mate => 
-                mate.category?.description === selectedType
+        // 1) por categoría (tu lógica original)
+        let list = selectedType === 'All'
+            ? allMates
+            : allMates.filter(mate => mate.category?.description === selectedType);
+
+        // 2) por texto (nombre del producto)
+        if (searchText) {
+            list = list.filter(m =>
+                (m.name || '').toLowerCase().includes(searchText)
             );
-            setFilteredMates(newFilteredMates);
         }
-    }, [selectedType, allMates]);
+
+        setFilteredMates(list);
+    }, [selectedType, allMates, searchText]);
 
     const openProductModal = (product) => {
         setSelectedProduct(product);
@@ -86,14 +91,12 @@ function ShopPage() {
     };
 
     const handleAddToCart = (product) => {
-        // Verificar si el usuario está autenticado
         if (!isAuthenticated) {
             closeProductModal();
             setIsAuthModalOpen(true);
             return;
         }
 
-        // Transformar el producto al formato que espera el carrito
         const cartItem = {
             id: product._id || product.id,
             name: product.name,
@@ -104,7 +107,6 @@ function ShopPage() {
         };
         
         addToCart(cartItem);
-        console.log(`Producto "${product.name}" agregado al carrito!`);
         closeProductModal();
     };
 
