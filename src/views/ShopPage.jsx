@@ -101,7 +101,7 @@ function ShopPage() {
             id: product._id || product.id,
             name: product.name,
             price: product.price,
-            images: product.images || [product.imageUrl],
+            imageUrls: product.imageUrls || product.images || [product.imageUrl],
             category: product.category,
             stock: product.stock,
         };
