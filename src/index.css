@@ -61,6 +61,193 @@ button:focus-visible {
   }
 }
 
+/* Price Filter Styles */
+.price-filter-container {
+  position: relative;
+  min-width: 250px;
+}
+
+.price-filter-toggle {
+  width: auto;
+  background-color: white;
+  color: #333;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  padding: 8px 25px;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.price-filter-toggle:hover {
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.filter-toggle-text {
+  flex: 1;
+  text-align: left;
+}
+
+.price-filter-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background-color: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  min-width: 350px;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.filter-title {
+  font-size: 1em;
+  font-weight: 600;
+  color: #2d5d52;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.price-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 15px;
+  font-size: 1em;
+  font-weight: 600;
+  color: #333;
+}
+
+.price-value {
+  color: #2d5d52;
+  font-weight: 700;
+  font-size: 1em;
+}
+
+.price-separator {
+  color: #999;
+}
+
+.slider-container {
+  margin-bottom: 15px;
+}
+
+.slider-wrapper {
+  margin-bottom: 12px;
+}
+
+.slider-label {
+  display: block;
+  font-size: 0.85em;
+  color: #666;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.price-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 5px;
+  outline: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.price-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2d5d52;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.price-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.price-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2d5d52;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.price-slider::-moz-range-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.reset-filter-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: #2d5d52;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.reset-filter-btn:hover {
+  background-color: #1f4339;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(45, 93, 82, 0.3);
+}
+
+/* Filters Container - Para alinear los filtros horizontalmente */
+.filters-row {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.filters-row .filter-tabs-container {
+  flex: 0 0 auto;
+  margin-bottom: 0;
+}
+
+.filters-row .price-filter-container {
+  flex: 0 0 auto;
+  margin: 0;
+}
+
 /* Estilos en tu archivo CSS (ej: src/App.css) */
 
 .shop-page-container {
@@ -306,19 +493,21 @@ button:focus-visible {
 }
 
 .filter-tabs-container {
-    text-align: center; /* Centra el texto "Filtrar por" y los botones */
-    margin-bottom: 30px; 
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
 .filter-label {
     font-size: 1em;
     color: #555;
-    margin: 0 0 10px 0;
+    margin: 0;
+    font-weight: 500;
 }
 
 .filter-tabs {
     display: flex;
-    justify-content: center; /* Centra los botones */
+    justify-content: center;
     gap: 10px;
 }
 
