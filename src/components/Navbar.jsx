@@ -3,6 +3,8 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import AuthModal from './AuthModal';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from "../context/CartContext";
+import logoPM from '../assets/logo-purosmates.png';
+
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -51,34 +53,40 @@ export default function Navbar() {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-3">
             <Link to="/" className="flex items-center">
               <img 
-                src="./img/favicon.ico" 
-                alt="Puros Mates Logo" 
-                className="h-8 w-8"
+                src={logoPM}
+                alt="Puros Mates"
+                className="h-10 w-10 md:h-10 md:w-10 object-contain rounded-full"
+                loading="eager"
+                fetchpriority="high"
+                decoding="async"
               />
             </Link>
             <Link 
               to="/" 
-              className="text-xl font-bold text-[#F5F5DC]-800 hover:text-white-600 transition"
+              className="text-xl font-semibold tracking-wide text-[#F5F5DC]"
             >
               PUROS MATES
             </Link>
           </div>
 
           {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-2">
+            <ul className="flex items-center gap-2">
           <div className="hidden md:flex items-center space-x-6">
             <ul className="flex items-center space-x-6">
               <li>
                 <Link 
                   to="/" 
-                  className="text-white-700 hover:text-beige-900 transition"
+                  className="inline-flex items-center justify-center h-10 px-4 rounded-xl font-medium text-[#F5F5DC] border border-[#F5F5DC]/40 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:ring-offset-2 transition"
                 >
                   Productos
                 </Link>
               </li>
 
+              {/* Carrito: texto/borde blanco y fondo transparente */}
               {/* 🔎 Barra de búsqueda al lado de “Productos” */}
               <li className="flex items-center">
                 <form onSubmit={onSearchSubmit} className="flex items-center gap-2">
@@ -103,7 +111,7 @@ export default function Navbar() {
                 <button
                   type="button"
                   onClick={handleCartClick}
-                  className="relative text-gray-700 hover:text-gray-900 transition focus:outline-none"
+                  className="inline-flex items-center justify-center h-10 px-4 rounded-xl font-medium text-white border border-white/60 bg-transparent hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 transition relative"
                   aria-label="Ir al carrito"
                 >
                   🛒 Carrito
@@ -140,9 +148,10 @@ export default function Navbar() {
                     </button>
                   </div>
                 ) : (
+                  /* Login: texto/borde blanco y fondo transparente */
                   <button
                     onClick={() => setIsAuthModalOpen(true)}
-                    className="bg-[#2d5d52] text-white px-6 py-2 rounded-lg hover:bg-[#2d5d52]/90 transition shadow-sm"
+                    className="inline-flex items-center justify-center h-10 px-4 rounded-xl font-medium text-white border border-white/60 bg-transparent hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 transition"
                   >
                     Login
                   </button>
@@ -185,6 +194,7 @@ export default function Navbar() {
               </Link>
             </li>
 
+            {/* Carrito (mobile): texto/borde blanco y fondo transparente */}
             {/* 🔎 Búsqueda también en mobile */}
             <li>
               <form
@@ -211,7 +221,7 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={handleCartClick}
-                className="relative text-gray-700 hover:text-gray-900 transition focus:outline-none"
+                className="inline-flex items-center justify-center h-10 px-4 rounded-xl font-medium text-white border border-white/60 bg-transparent hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 transition w-full relative"
                 aria-label="Ir al carrito"
               >
                 🛒 Carrito
@@ -252,12 +262,13 @@ export default function Navbar() {
                   </button>
                 </div>
               ) : (
+                /* Login (mobile): texto/borde blanco y fondo transparente */
                 <button
                   onClick={() => {
                     setIsAuthModalOpen(true);
                     setIsMenuOpen(false);
                   }}
-                  className="w-full bg-[#2d5d52] text-white px-6 py-2 rounded-lg hover:bg-[#2d5d52]/90 transition shadow-sm text-center"
+                  className="inline-flex items-center justify-center h-10 px-4 rounded-xl font-medium text-white border border-white/60 bg-transparent hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 transition w-full text-center"
                 >
                   Login
                 </button>
