@@ -23,12 +23,24 @@ function ShopPage() {
     const { addToCart } = useCart();
     const { isAuthenticated } = useAuth();
 
-    // 👇 leer querystring (?q=...)
+    // 👇 leer querystring (?q=... y ?category=...)
     const location = useLocation();
     const searchText = useMemo(() => {
         const params = new URLSearchParams(location.search);
         return (params.get('q') || '').trim().toLowerCase();
     }, [location.search]);
+
+    const categoryFromUrl = useMemo(() => {
+        const params = new URLSearchParams(location.search);
+        return params.get('category') || null;
+    }, [location.search]);
+
+    // Establecer la categoría desde la URL cuando cambie
+    useEffect(() => {
+        if (categoryFromUrl) {
+            setSelectedType(categoryFromUrl);
+        }
+    }, [categoryFromUrl]);
 
     // Configuración de la API
     const API_URL = 'http://localhost:8080/products';
@@ -73,8 +85,7 @@ function ShopPage() {
     }, []);
 
     const handleFilterChange = (type) => {
-        if (selectedType === type) setSelectedType('All');
-        else setSelectedType(type);
+        setSelectedType(type);
     };
 
     const handlePriceChange = (newPriceRange) => {

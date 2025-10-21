@@ -96,7 +96,7 @@ function AdminPanel() {
   };
 
   const handleFilterChange = (type) => {
-    setSelectedType(selectedType === type ? 'All' : type);
+    setSelectedType(type);
   };
 
   const handleLogout = () => {

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const CATEGORIES = ['Mate', 'Bombilla', 'Accesorio'];
+const CATEGORIES = ['All', 'mates', 'bombillas', 'accesorios'];
 
 function FilterTabs({ selectedType, onFilterChange }) {
     return (
@@ -13,7 +13,7 @@ function FilterTabs({ selectedType, onFilterChange }) {
                         className={`filter-tab-button ${selectedType === category ? 'active' : ''}`}
                         onClick={() => onFilterChange(category)}
                     >
-                        {category}
+                        {category === 'All' ? 'Todos' : category}
                     </button>
                 ))}
             </div>
