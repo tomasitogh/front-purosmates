@@ -110,7 +110,7 @@ function AdminPanel() {
       description: '',
       price: '',
       stock: '',
-      categoryId: categories.length > 0 ? categories[0].id : '',
+      categoryId: '', // Dejar vacío para que el usuario seleccione
       imageUrls: [],
     });
     setSelectedProduct(null);
@@ -155,6 +155,12 @@ function AdminPanel() {
       return;
     }
 
+    // Validar que se haya seleccionado una categoría
+    if (!formData.categoryId) {
+      alert('Debes seleccionar una categoría');
+      return;
+    }
+
     const productData = {
       name: formData.name,
       description: formData.description,
@@ -194,7 +200,7 @@ function AdminPanel() {
       } else {
         const errorText = await response.text();
         console.error('Error response:', response.status, errorText);
-        alert(`Error al guardar el producto: ${response.status} - ${errorText}`);
+        alert(`Error al guardar el producto: ${response.status}\n${errorText}`);
       }
     } catch (error) {
       console.error('Error:', error);

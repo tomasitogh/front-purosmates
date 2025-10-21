@@ -100,6 +100,7 @@ function ShopPage() {
             price: product.price,
             images: product.images || [product.imageUrl],
             category: product.category,
+            stock: product.stock, 
         };
         
         addToCart(cartItem);
