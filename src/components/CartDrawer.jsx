@@ -18,7 +18,21 @@ export default function CartDrawer() {
             <p className="text-gray-500">Todavía no agregaste productos.</p>
           ) : items.map(it => (
             <div key={it.id} className="flex gap-3 border rounded-xl p-3">
-              {it.image && <img src={it.image} alt={it.name} className="w-16 h-16 object-cover rounded-lg" />}
+              {it.imageUrls && it.imageUrls.length > 0 ? (
+                <img 
+                  src={it.imageUrls[0]} 
+                  alt={it.name} 
+                  className="w-16 h-16 object-cover rounded-lg"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="%23ddd" width="100" height="100"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%23999">Sin imagen</text></svg>';
+                  }}
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-lg bg-gray-200 flex items-center justify-center text-gray-400 text-xs">
+                  Sin img
+                </div>
+              )}
               <div className="flex-1">
                 <div className="font-medium">{it.name}</div>
                 <div className="text-sm text-gray-600">${it.price} c/u</div>

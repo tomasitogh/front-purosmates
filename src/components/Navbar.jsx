@@ -55,7 +55,7 @@ export default function Navbar() {
                 alt="Puros Mates"
                 className="h-10 w-10 md:h-10 md:w-10 object-contain rounded-full"
                 loading="eager"
-                fetchpriority="high"
+                fetchPriority="high"
                 decoding="async"
               />
             </Link>
