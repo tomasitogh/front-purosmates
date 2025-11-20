@@ -11,7 +11,7 @@ import { useAuth } from '../context/AuthContext';
 function ShopPage() {
     const [allMates, setAllMates] = useState([]);
     const [filteredMates, setFilteredMates] = useState([]);
-    const [selectedType, setSelectedType] = useState('All');
+    const [selectedType, setSelectedType] = useState([]);
     const [priceRange, setPriceRange] = useState([0, 100000]);
     const [minPrice, setMinPrice] = useState(0);
     const [maxPrice, setMaxPrice] = useState(100000);
@@ -38,7 +38,7 @@ function ShopPage() {
     // Establecer la categoría desde la URL cuando cambie
     useEffect(() => {
         if (categoryFromUrl) {
-            setSelectedType(categoryFromUrl);
+            setSelectedType([categoryFromUrl]);
         }
     }, [categoryFromUrl]);
 
@@ -84,8 +84,8 @@ function ShopPage() {
         fetchProductos();
     }, []);
 
-    const handleFilterChange = (type) => {
-        setSelectedType(type);
+    const handleFilterChange = (categories) => {
+        setSelectedType(categories);
     };
 
     const handlePriceChange = (newPriceRange) => {
@@ -94,10 +94,12 @@ function ShopPage() {
 
     // 🔎 aplicar filtros: categoría (tabs) + nombre (q) + precio
     useEffect(() => {
-        // 1) por categoría (tu lógica original)
-        let list = selectedType === 'All'
+        // 1) por categoría (múltiples selecciones)
+        let list = selectedType.length === 0
             ? allMates
-            : allMates.filter(mate => mate.category?.description === selectedType);
+            : allMates.filter(mate => 
+                selectedType.includes(mate.category?.description)
+            );
 
         // 2) por texto (nombre del producto)
         if (searchText) {
@@ -171,20 +173,22 @@ function ShopPage() {
 
     return (
         <div className="shop-page-container">
-            <div className="shop-layout-centered">
-                <div className="main-content">
+            <div className="shop-layout-with-sidebar">
+                <aside className="shop-sidebar">
+                    <h3 className="sidebar-title">Filtros</h3>
+                    <FilterTabs 
+                        selectedType={selectedType}
+                        onFilterChange={handleFilterChange}
+                    />
+                    <PriceFilter 
+                        minPrice={minPrice}
+                        maxPrice={maxPrice}
+                        onPriceChange={handlePriceChange}
+                    />
+                </aside>
+                
+                <div className="shop-main-content">
                     <h1 className="main-title-centered">Productos</h1> 
-                    <div className="filters-row">
-                        <FilterTabs 
-                            selectedType={selectedType}
-                            onFilterChange={handleFilterChange}
-                        />
-                        <PriceFilter 
-                            minPrice={minPrice}
-                            maxPrice={maxPrice}
-                            onPriceChange={handlePriceChange}
-                        />
-                    </div>
                     <ProductGrid 
                         mates={filteredMates} 
                         onProductClick={openProductModal} 
