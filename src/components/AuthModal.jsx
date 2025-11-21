@@ -156,8 +156,8 @@ function AuthModal({ isOpen, onClose }) {
                 try { 
                     data = await res.json();
                     console.log('Registro exitoso:', data);
-                } catch (e) {
-                    console.log('Respuesta sin JSON, asumiendo éxito');
+                } catch (error) {
+                    console.log('Respuesta sin JSON, asumiendo éxito', error);
                 }
 
                 if (data.access_token) {

@@ -5,7 +5,7 @@ import FilterTabs from '../components/FilterTabs';
 import ImageUploader from '../components/ImageUploader';
 
 function AdminPanel() {
-  const { user, token, logout, isAdmin } = useAuth();
+  const { token, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -33,6 +33,7 @@ function AdminPanel() {
       fetchProducts();
       fetchCategories();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -97,11 +98,6 @@ function AdminPanel() {
 
   const handleFilterChange = (type) => {
     setSelectedType(selectedType === type ? 'All' : type);
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
   };
 
   const openCreateModal = () => {

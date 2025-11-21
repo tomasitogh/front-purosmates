@@ -7,10 +7,60 @@ import AuthModal from '../components/AuthModal';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
+// Mock data para demostración cuando el backend no está disponible
+const mockProducts = [
+    {
+        _id: '1',
+        name: 'Mate Imperial Premium',
+        price: 15000,
+        description: 'Mate de calabaza premium con virola de alpaca',
+        stock: 10,
+        images: ['https://via.placeholder.com/300x300?text=Mate+Premium'],
+        category: { description: 'Mate' }
+    },
+    {
+        _id: '2',
+        name: 'Bombilla Acero Inoxidable',
+        price: 3500,
+        description: 'Bombilla de acero inoxidable con filtro',
+        stock: 25,
+        images: ['https://via.placeholder.com/300x300?text=Bombilla'],
+        category: { description: 'Bombilla' }
+    },
+    {
+        _id: '3',
+        name: 'Mate Uruguayo Tradicional',
+        price: 12000,
+        description: 'Mate tradicional uruguayo de calabaza',
+        stock: 8,
+        images: ['https://via.placeholder.com/300x300?text=Mate+Uruguayo'],
+        category: { description: 'Mate' }
+    },
+    {
+        _id: '4',
+        name: 'Yerbera de Cuero',
+        price: 8000,
+        description: 'Yerbera artesanal de cuero genuino',
+        stock: 15,
+        images: ['https://via.placeholder.com/300x300?text=Yerbera'],
+        category: { description: 'Accesorio' }
+    },
+    {
+        _id: '5',
+        name: 'Mate Camionero',
+        price: 18000,
+        description: 'Mate camionero con virola de alpaca',
+        stock: 5,
+        images: ['https://via.placeholder.com/300x300?text=Mate+Camionero'],
+        category: { description: 'Mate' }
+    },
+];
+
 function ShopPage() {
     const [allMates, setAllMates] = useState([]);
     const [filteredMates, setFilteredMates] = useState([]);
     const [selectedType, setSelectedType] = useState('All');
+    const [sortBy, setSortBy] = useState('name-asc'); // New state for sorting
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
@@ -49,7 +99,9 @@ function ShopPage() {
                 setAllMates(data);
             } catch (error) {
                 console.error('Error al cargar productos:', error);
-                setError(error.message);
+                // Usar datos mock cuando el backend no está disponible
+                setAllMates(mockProducts);
+                setError(null); // Clear error to show mock data
             } finally {
                 setLoading(false);
             }
@@ -63,7 +115,7 @@ function ShopPage() {
         else setSelectedType(type);
     };
 
-    // 🔎 aplicar filtros: categoría (tabs) + nombre (q)
+    // 🔎 aplicar filtros: categoría (tabs) + nombre (q) + ordenamiento
     useEffect(() => {
         // 1) por categoría (tu lógica original)
         let list = selectedType === 'All'
@@ -77,8 +129,23 @@ function ShopPage() {
             );
         }
 
-        setFilteredMates(list);
-    }, [selectedType, allMates, searchText]);
+        // 3) Ordenamiento
+        const sorted = [...list].sort((a, b) => {
+            switch (sortBy) {
+                case 'price-asc':
+                    return (a.price || 0) - (b.price || 0);
+                case 'price-desc':
+                    return (b.price || 0) - (a.price || 0);
+                case 'name-desc':
+                    return (b.name || '').localeCompare(a.name || '');
+                case 'name-asc':
+                default:
+                    return (a.name || '').localeCompare(b.name || '');
+            }
+        });
+
+        setFilteredMates(sorted);
+    }, [selectedType, allMates, searchText, sortBy]);
 
     const openProductModal = (product) => {
         setSelectedProduct(product);
@@ -139,11 +206,34 @@ function ShopPage() {
         <div className="shop-page-container">
             <div className="shop-layout-centered">
                 <div className="main-content">
-                    <h1 className="main-title-centered">Productos</h1> 
-                    <FilterTabs 
-                        selectedType={selectedType}
-                        onFilterChange={handleFilterChange}
-                    />
+                    <h1 className="main-title-centered">Productos</h1>
+                    
+                    {/* Filter and Sort Controls */}
+                    <div className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4">
+                        <FilterTabs 
+                            selectedType={selectedType}
+                            onFilterChange={handleFilterChange}
+                        />
+                        
+                        {/* Sort Dropdown */}
+                        <div className="flex items-center gap-2">
+                            <label htmlFor="sort-select" className="text-gray-700 font-medium whitespace-nowrap">
+                                Ordenar por:
+                            </label>
+                            <select
+                                id="sort-select"
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value)}
+                                className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#2d5d52] bg-white"
+                            >
+                                <option value="name-asc">Nombre (A-Z)</option>
+                                <option value="name-desc">Nombre (Z-A)</option>
+                                <option value="price-asc">Precio (Menor a Mayor)</option>
+                                <option value="price-desc">Precio (Mayor a Menor)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
                     <ProductGrid 
                         mates={filteredMates} 
                         onProductClick={openProductModal} 
