@@ -113,11 +113,21 @@ export default function Carrito() {
         <div className="lg:col-span-2 space-y-4">
           {items.map((item) => (
             <div key={item.id} className="bg-white rounded-lg shadow-md p-6 flex items-center gap-4">
-              <img
-                src={item.images?.[0] || '/img/mate-default.jpg'}
-                alt={item.name}
-                className="w-24 h-24 object-cover rounded-lg"
-              />
+              {item.imageUrls && item.imageUrls.length > 0 ? (
+                <img
+                  src={item.imageUrls[0]}
+                  alt={item.name}
+                  className="w-24 h-24 object-cover rounded-lg"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect fill="%23ddd" width="200" height="200"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%23999">Sin imagen</text></svg>';
+                  }}
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-lg bg-gray-200 flex items-center justify-center text-gray-400 text-xs">
+                  Sin imagen
+                </div>
+              )}
               
               <div className="flex-grow">
                 <h3 className="text-lg font-semibold text-gray-800">{item.name}</h3>

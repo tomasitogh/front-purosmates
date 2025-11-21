@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import logoPM from "../assets/logo-purosmates.png";
 import igLogo from "../assets/instagram.png";
 import wppLogo from "../assets/wpp.png";
@@ -11,81 +12,81 @@ export default function Footer() {
           {/* Logo Column */}
           <div className="flex flex-col items-start">
             <div className="flex items-center space-x-3 mb-4">
-              <a href="./index.html">
+              <Link to="/">
                 <img 
                   src={logoPM} 
                   alt="Puros Mates Logo" 
                   className="h-20 w-20 object-contain p-1"
                 />
-              </a>
+              </Link>
             </div>
-            <a 
-              href="./index.html" 
+            <Link 
+              to="/" 
               className="text-2xl font-bold text-[#3D5F54] hover:opacity-80 transition"
             >
               PUROS MATES
-            </a>
+            </Link>
           </div>
 
           {/* Products Column */}
           <div>
-            <a href="./catalogo.html">
+            <Link to="/">
               <h3 className="text-[#3D5F54] text-2xl font-bold mb-6 hover:opacity-80 transition">
                 Productos
               </h3>
-            </a>
+            </Link>
             <ul className="space-y-3 text-lg">
               <li>
-                <a 
-                  href="./catalogo.html#mate" 
+                <Link 
+                  to="/?category=mates" 
                   className="hover:opacity-70 transition"
                 >
                   Mates
-                </a>
+                </Link>
               </li>
               <li>
-                <a 
-                  href="./catalogo.html#bombilla" 
+                <Link 
+                  to="/?category=bombillas" 
                   className="hover:opacity-70 transition"
                 >
                   Bombillas
-                </a>
+                </Link>
               </li>
               <li>
-                <a 
-                  href="./catalogo.html#accesorio" 
+                <Link 
+                  to="/?category=accesorios" 
                   className="hover:opacity-70 transition"
                 >
                   Accesorios
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
 
           {/* About Column */}
           <div>
-            <a href="./index.html">
+            <Link to="/">
               <h3 className="text-[#3D5F54] text-2xl font-bold mb-6 hover:opacity-80 transition">
                 Puros Mates
               </h3>
-            </a>
+            </Link>
             <ul className="space-y-3 text-lg">
-              <li>
+              {/*<li>
                 <a 
                   href="./contacto.html" 
                   className="hover:opacity-70 transition"
                 >
                   Contacto
                 </a>
-              </li>
-              <li>
+              </li>*/}
+              {/*<li>
                 <a 
                   href="./index.html" 
                   className="hover:opacity-70 transition"
                 >
                   Sobre Nosotros
                 </a>
-              </li>
+              </li>*/}
             </ul>
             <div className="flex space-x-4 mt-6">
               <a 
@@ -122,63 +123,63 @@ export default function Footer() {
         <div className="md:hidden flex flex-col items-center text-center space-y-10">
           {/* Logo */}
           <div className="flex flex-col items-center">
-            <a href="./index.html" className="mb-4">
+            <Link to="/" className="mb-4">
               <img 
                 src={logoPM} 
                 alt="Puros Mates Logo" 
                 className="h-32 w-32 object-contain p-1"
               />
-            </a>
-            <a 
-              href="./index.html" 
+            </Link>
+            <Link 
+              to="/" 
               className="text-3xl font-bold text-[#3D5F54] hover:opacity-80 transition"
             >
               PUROS MATES
-            </a>
+            </Link>
           </div>
 
           {/* Products */}
           <div>
-            <a href="./catalogo.html">
+            <Link to="/">
               <h3 className="text-[#3D5F54] text-2xl font-bold mb-4 hover:opacity-80 transition">
                 Productos
               </h3>
-            </a>
+            </Link>
             <ul className="space-y-2 text-lg">
               <li>
-                <a 
-                  href="./catalogo.html#mate" 
+                <Link 
+                  to="/?category=mates" 
                   className="hover:opacity-70 transition"
                 >
                   Mates
-                </a>
+                </Link>
               </li>
               <li>
-                <a 
-                  href="./catalogo.html#bombilla" 
+                <Link 
+                  to="/?category=bombillas" 
                   className="hover:opacity-70 transition"
                 >
                   Bombillas
-                </a>
+                </Link>
               </li>
               <li>
-                <a 
-                  href="./catalogo.html#accesorio" 
+                <Link 
+                  to="/?category=accesorios" 
                   className="hover:opacity-70 transition"
                 >
                   Accesorios
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
 
           {/* About */}
           <div>
-            <a href="./index.html">
+            <Link to="/">
               <h3 className="text-[#3D5F54] text-2xl font-bold mb-4 hover:opacity-80 transition">
                 Puros Mates
               </h3>
-            </a>
+            </Link>
             <ul className="space-y-2 text-lg">
               <li>
                 <a 

@@ -24,6 +24,7 @@ function AdminPanel() {
     stock: '',
     categoryId: '',
     imageUrls: [],
+    active: true,
   });
 
   useEffect(() => {
@@ -63,6 +64,7 @@ function AdminPanel() {
       if (response.ok) {
         const data = await response.json();
         console.log('Products fetched:', data.length);
+        console.log('First product active state:', data[0]?.active);
         setProducts(data);
         setFilteredProducts(data);
       } else {
@@ -96,7 +98,7 @@ function AdminPanel() {
   };
 
   const handleFilterChange = (type) => {
-    setSelectedType(selectedType === type ? 'All' : type);
+    setSelectedType(type);
   };
 
   const handleLogout = () => {
@@ -110,8 +112,9 @@ function AdminPanel() {
       description: '',
       price: '',
       stock: '',
-      categoryId: '', // Dejar vacío para que el usuario seleccione
+      categoryId: '',
       imageUrls: [],
+      active: true,
     });
     setSelectedProduct(null);
     setIsEditing(false);
@@ -126,6 +129,7 @@ function AdminPanel() {
       stock: product.stock.toString(),
       categoryId: product.category?.id || '',
       imageUrls: product.imageUrls || [],
+      active: product.active !== undefined ? product.active : true,
     });
     setSelectedProduct(product);
     setIsEditing(true);
@@ -139,23 +143,21 @@ function AdminPanel() {
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validar que haya al menos una imagen
     if (!formData.imageUrls || formData.imageUrls.length === 0) {
       alert('Debes subir al menos una imagen del producto');
       return;
     }
 
-    // Validar que se haya seleccionado una categoría
     if (!formData.categoryId) {
       alert('Debes seleccionar una categoría');
       return;
@@ -170,6 +172,7 @@ function AdminPanel() {
         id: parseInt(formData.categoryId),
       },
       imageUrls: formData.imageUrls,
+      active: formData.active,
     };
 
     try {
@@ -205,6 +208,65 @@ function AdminPanel() {
     } catch (error) {
       console.error('Error:', error);
       alert('Error al guardar el producto: ' + error.message);
+    }
+  };
+
+  const handleToggleActive = async (product) => {
+    // Obtener el estado actual - si es undefined o true, está activo
+    const currentState = product.active !== false;
+    const newActiveState = !currentState;
+    const action = newActiveState ? 'activar' : 'inactivar';
+    
+    if (!confirm(`¿Estás seguro de que deseas ${action} este producto?`)) {
+      return;
+    }
+
+    try {
+      console.log('Toggling product active state:', {
+        productId: product.id,
+        currentState: currentState,
+        backendValue: product.active,
+        newState: newActiveState
+      });
+
+      const productData = {
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        stock: product.stock,
+        category: {
+          id: product.category?.id,
+        },
+        imageUrls: product.imageUrls || [],
+        active: newActiveState,
+      };
+
+      console.log('Sending product data:', productData);
+
+      const response = await fetch(`http://localhost:8080/products/${product.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(productData),
+      });
+
+      console.log('Toggle response status:', response.status);
+
+      if (response.ok) {
+        const updatedProduct = await response.json();
+        console.log('Updated product:', updatedProduct);
+        fetchProducts();
+        alert(`Producto ${newActiveState ? 'activado' : 'inactivado'} exitosamente`);
+      } else {
+        const errorText = await response.text();
+        console.error('Toggle active error:', response.status, errorText);
+        alert(`Error al ${action} el producto: ${response.status}\n${errorText}`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert(`Error al ${action} el producto: ` + error.message);
     }
   };
 
@@ -251,7 +313,6 @@ function AdminPanel() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Contenido principal */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6 flex justify-between items-center">
           <h2 className="text-2xl font-bold text-gray-900">Gestión de Productos</h2>
@@ -263,30 +324,44 @@ function AdminPanel() {
           </button>
         </div>
 
-        {/* Filtros */}
         <FilterTabs
           selectedType={selectedType}
           onFilterChange={handleFilterChange}
         />
 
-        {/* Grid de productos */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.map((product) => (
             <div
               key={product.id}
-              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition"
+              className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition ${
+                product.active === false ? 'opacity-60 border-2 border-gray-300' : ''
+              }`}
             >
-              <div className="h-48 bg-gray-200 flex items-center justify-center overflow-hidden">
-                {product.imageUrls && product.imageUrls.length > 0 ? (
-                  <img
-                    src={product.imageUrls[0]}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-gray-400">Sin imagen</span>
+              {/* Badge de estado */}
+              <div className="relative">
+                <div className="h-48 bg-gray-200 flex items-center justify-center overflow-hidden">
+                  {product.imageUrls && product.imageUrls.length > 0 ? (
+                    <img
+                      src={product.imageUrls[0]}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-gray-400">Sin imagen</span>
+                  )}
+                </div>
+                {product.active === false && (
+                  <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                    INACTIVO
+                  </div>
+                )}
+                {product.stock === 0 && (
+                  <div className="absolute top-2 left-2 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                    SIN STOCK
+                  </div>
                 )}
               </div>
+              
               <div className="p-4">
                 <h3 className="font-semibold text-lg text-gray-900 mb-2">
                   {product.name}
@@ -305,18 +380,32 @@ function AdminPanel() {
                 <div className="text-xs text-gray-500 mb-4">
                   Categoría: {product.category?.description || 'Sin categoría'}
                 </div>
-                <div className="flex space-x-2">
+                
+                {/* Botones de acción */}
+                <div className="space-y-2">
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => openEditModal(product)}
+                      className="flex-1 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition text-sm shadow-sm"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => handleDelete(product.id)}
+                      className="flex-1 bg-red-50 text-red-600 px-3 py-2 rounded-lg hover:bg-red-100 transition text-sm shadow-sm"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
                   <button
-                    onClick={() => openEditModal(product)}
-                    className="flex-1 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition text-sm shadow-sm"
+                    onClick={() => handleToggleActive(product)}
+                    className={`w-full px-3 py-2 rounded-lg transition text-sm font-medium shadow-sm ${
+                      product.active === false
+                        ? 'bg-green-50 text-green-700 hover:bg-green-100'
+                        : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
+                    }`}
                   >
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => handleDelete(product.id)}
-                    className="flex-1 bg-red-50 text-red-600 px-3 py-2 rounded-lg hover:bg-red-100 transition text-sm shadow-sm"
-                  >
-                    Eliminar
+                    {product.active === false ? '✓ Activar' : '✕ Inactivar'}
                   </button>
                 </div>
               </div>
@@ -369,7 +458,6 @@ function AdminPanel() {
                     />
                   </div>
 
-                  {/* Image Uploader */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Imágenes del Producto *
@@ -433,6 +521,21 @@ function AdminPanel() {
                         </option>
                       ))}
                     </select>
+                  </div>
+
+                  {/* Toggle para estado activo/inactivo */}
+                  <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+                    <input
+                      type="checkbox"
+                      name="active"
+                      id="active"
+                      checked={formData.active}
+                      onChange={handleInputChange}
+                      className="w-5 h-5 text-[#2d5d52] rounded focus:ring-[#2d5d52]"
+                    />
+                    <label htmlFor="active" className="text-sm font-medium text-gray-700">
+                      Producto activo (visible para usuarios)
+                    </label>
                   </div>
                 </div>
 

@@ -55,7 +55,7 @@ export function CartProvider({ children }) {
   // Verificar si hay al menos un producto de cada categoría
   const hasComboDiscount = useMemo(() => {
     const categories = new Set(items.map(item => item.category?.description || item.category));
-    return categories.has('Mate') && categories.has('Bombilla') && categories.has('Accesorio');
+    return categories.has('mates') && categories.has('bombillas') && categories.has('accesorios');
   }, [items]);
   
   const discount = useMemo(() => {

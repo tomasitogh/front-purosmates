@@ -192,7 +192,7 @@ function AuthModal({ isOpen, onClose }) {
                 {/* Logo en esquina superior izquierda */}
                 <div className="absolute top-6 left-6 z-10 flex items-center gap-2">
                     <img 
-                        src="/images/logo-icon.png" 
+                        src="src/assets/logo-purosmates.png" 
                         alt="Puros Mates" 
                         className="w-8 h-8"
                     />
@@ -210,7 +210,7 @@ function AuthModal({ isOpen, onClose }) {
                 {/* Imagen lateral - 30% */}
                 <div className="w-[30%] bg-gradient-to-br from-[#2d5d52]/10 to-[#2d5d52]/20 hidden md:flex items-center justify-center">
                     <img 
-                        src="/images/mate-auth.png" 
+                        src="src/assets/fondo-tandil.webp" 
                         alt="Mate" 
                         className="w-full h-full object-cover"
                     />
