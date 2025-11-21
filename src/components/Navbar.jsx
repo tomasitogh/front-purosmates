@@ -14,7 +14,7 @@ export default function Navbar() {
   const [q, setQ] = useState("");
 
   const { user, isAuthenticated, logout, isAdmin } = useAuth();
-  const { totalQty, setOpen } = useCart();
+  const { totalQty } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -73,8 +73,6 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-2">
-            <ul className="flex items-center gap-2">
           <div className="hidden md:flex items-center space-x-6">
             <ul className="flex items-center space-x-6">
               <li>
@@ -158,7 +156,6 @@ export default function Navbar() {
                 )}
               </li>
             </ul>
-
             <button
               onClick={() => navigate('/')}
               className="bg-[#D4AF37] text-[#2d5d52] px-6 py-2 rounded-lg hover:bg-[#DAA520] transition font-semibold focus:outline-none"

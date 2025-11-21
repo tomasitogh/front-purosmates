@@ -47,7 +47,7 @@ export default function Carrito() {
         throw new Error(errorData?.message || 'Error al procesar la compra');
       }
 
-      const order = await response.json();
+      await response.json();
       
       // Mostrar mensaje de éxito
       setShowSuccess(true);
