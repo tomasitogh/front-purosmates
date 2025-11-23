@@ -62,6 +62,48 @@ button:focus-visible {
 }
 
 /* Price Filter Styles */
+/* Price Filter in Sidebar */
+.shop-sidebar .price-filter-container {
+    position: relative;
+    width: 100%;
+    min-width: unset;
+    overflow: hidden;
+}
+
+.shop-sidebar .price-filter-content {
+    background-color: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.shop-sidebar .price-slider {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.shop-sidebar .slider-wrapper {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.shop-sidebar .slider-container {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.shop-sidebar .price-display {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.shop-sidebar .reset-filter-btn {
+    width: 100%;
+    box-sizing: border-box;
+}
+
 .price-filter-container {
   position: relative;
   min-width: 250px;
@@ -250,6 +292,47 @@ button:focus-visible {
 
 /* Estilos en tu archivo CSS (ej: src/App.css) */
 
+/* Shop Layout with Sidebar */
+.shop-layout-with-sidebar {
+    display: flex;
+    gap: 30px;
+    max-width: 100%;
+    margin: 0;
+    padding: 20px;
+    width: 100%;
+}
+
+/* Sidebar Styles */
+.shop-sidebar {
+    width: 18%;
+    min-width: 220px;
+    max-width: 280px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    flex-shrink: 0;
+}
+
+.sidebar-title {
+    font-size: 1.4em;
+    font-weight: 600;
+    color: #2d5d52;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #2d5d52;
+}
+
+/* Main Content Area */
+.shop-main-content {
+    flex: 1;
+    min-width: 0;
+    max-width: 1400px;
+}
+
 .shop-page-container {
     /* Es bueno asegurarse de que ocupe todo el espacio */
     width: 100%; 
@@ -266,9 +349,48 @@ button:focus-visible {
 
 .product-grid {
     display: grid;
-    /* Crea columnas flexibles: mínimo de 200px por tarjeta, máximo lo que puedan ocupar */
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
-    gap: 20px; /* Espacio entre las tarjetas */
+    /* 4 productos por fila */
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 20px;
+}
+
+/* Responsive: 3 columnas en tablets */
+@media (max-width: 1400px) {
+    .product-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Responsive: 2 columnas en pantallas pequeñas */
+@media (max-width: 1000px) {
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .shop-sidebar {
+        width: 22%;
+    }
+}
+
+/* Responsive: Stack layout en tablets */
+@media (max-width: 768px) {
+    .shop-layout-with-sidebar {
+        flex-direction: column;
+    }
+    
+    .shop-sidebar {
+        width: 100%;
+        max-width: 100%;
+        position: relative;
+        top: 0;
+    }
+}
+
+/* Responsive: 1 columna en móviles */
+@media (max-width: 600px) {
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Estilos básicos para la tarjeta */
@@ -492,6 +614,55 @@ button:focus-visible {
     color: #333;
 }
 
+/* Filter Tabs in Sidebar */
+.shop-sidebar .filter-tabs-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.shop-sidebar .filter-label {
+    font-size: 1.1em;
+    color: #333;
+    margin: 0 0 10px 0;
+    font-weight: 600;
+}
+
+.shop-sidebar .filter-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.shop-sidebar .filter-tab-button {
+    background-color: white;
+    color: #333;
+    border: 1px solid #ddd;
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.shop-sidebar .filter-tab-button:hover {
+    background-color: #f5f5f5;
+    border-color: #2d5d52;
+    transform: translateX(2px);
+}
+
+.shop-sidebar .filter-tab-button.active {
+    background-color: #2d5d52;
+    color: white;
+    border-color: #2d5d52;
+    font-weight: 600;
+    transform: translateX(2px);
+}
+
+/* Original horizontal filter tabs (keep for other uses) */
 .filter-tabs-container {
     display: flex;
     align-items: center;
