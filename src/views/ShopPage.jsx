@@ -165,13 +165,23 @@ function ShopPage() {
                         onPriceChange={handlePriceChange}
                     />
                 </aside>
-                
-                <div className="shop-main-content">
-                    <h1 className="main-title-centered">Productos</h1> 
-                    <ProductGrid 
-                        mates={filteredMates} 
-                        onProductClick={openProductModal} 
-                    />
+                <div className="shop-content-wrapper">
+                    <div className="shop-main-content">
+                        <h1 className="main-title-centered">Productos</h1> 
+                        <ProductGrid 
+                            mates={filteredMates} 
+                            onProductClick={openProductModal} 
+                        />
+                    </div>
+
+                    {/* 👇 BANNER LATERAL - Solo cambiá la URL de la imagen */}
+                    <aside className="shop-sidebar-banner">
+                        <img 
+                            src="/banner-lateral.png" 
+                            alt="Banner publicitario" 
+                            className="sidebar-banner-img"
+                        />
+                    </aside>
                 </div>
             </div>
 
