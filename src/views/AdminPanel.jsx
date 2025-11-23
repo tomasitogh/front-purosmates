@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { fetchProducts } from '../redux/productSlice';
+import { fetchAllProductsAdmin } from '../redux/productSlice';
 import { fetchCategories } from '../redux/categorySlice';
 import { createProduct, updateProduct, deleteProduct, clearAdminMessages } from '../redux/adminSlice';
 import FilterTabs from '../components/FilterTabs';
@@ -40,7 +40,7 @@ function AdminPanel() {
     if (!isAdmin()) {
       navigate('/');
     } else {
-      dispatch(fetchProducts());
+      dispatch(fetchAllProductsAdmin(token));
       dispatch(fetchCategories(token));
     }
   }, [dispatch, token]);
@@ -157,7 +157,7 @@ function AdminPanel() {
         await dispatch(createProduct({ productData, token })).unwrap();
       }
       
-      dispatch(fetchProducts());
+      dispatch(fetchAllProductsAdmin(token));
       closeModal();
     } catch (error) {
       console.error('Error:', error);
@@ -175,13 +175,6 @@ function AdminPanel() {
     }
 
     try {
-      console.log('Toggling product active state:', {
-        productId: product.id,
-        currentState: currentState,
-        backendValue: product.active,
-        newState: newActiveState
-      });
-
       const productData = {
         name: product.name,
         description: product.description,
@@ -194,29 +187,16 @@ function AdminPanel() {
         active: newActiveState,
       };
 
-      console.log('Sending product data:', productData);
-
-      const response = await fetch(`http://localhost:8080/products/${product.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(productData),
-      });
-
-      console.log('Toggle response status:', response.status);
-
-      if (response.ok) {
-        const updatedProduct = await response.json();
-        console.log('Updated product:', updatedProduct);
-        fetchProducts();
-        alert(`Producto ${newActiveState ? 'activado' : 'inactivado'} exitosamente`);
-      } else {
-        const errorText = await response.text();
-        console.error('Toggle active error:', response.status, errorText);
-        alert(`Error al ${action} el producto: ${response.status}\n${errorText}`);
-      }
+      await dispatch(updateProduct({ 
+        productId: product.id, 
+        productData, 
+        token 
+      })).unwrap();
+      
+      // Refrescar lista de productos desde Redux (admin)
+      dispatch(fetchAllProductsAdmin(token));
+      
+      alert(`Producto ${newActiveState ? 'activado' : 'inactivado'} exitosamente`);
     } catch (error) {
       console.error('Error:', error);
       alert(`Error al ${action} el producto: ` + error.message);
@@ -230,7 +210,7 @@ function AdminPanel() {
 
     try {
       await dispatch(deleteProduct({ productId, token })).unwrap();
-      dispatch(fetchProducts());
+      dispatch(fetchAllProductsAdmin(token));
     } catch (error) {
       console.error('Error:', error);
     }
