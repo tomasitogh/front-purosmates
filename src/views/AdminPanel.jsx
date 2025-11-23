@@ -1,20 +1,29 @@
 import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { fetchProducts } from '../redux/productSlice';
+import { fetchCategories } from '../redux/categorySlice';
+import { createProduct, updateProduct, deleteProduct, clearAdminMessages } from '../redux/adminSlice';
 import FilterTabs from '../components/FilterTabs';
 import ImageUploader from '../components/ImageUploader';
 
 function AdminPanel() {
   const { user, token, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const [products, setProducts] = useState([]);
+  const dispatch = useDispatch();
+  
+  // Redux state
+  const { items: products, loading: productsLoading } = useSelector((state) => state.products);
+  const { items: categories } = useSelector((state) => state.categories);
+  const { loading: adminLoading, error: adminError, successMessage } = useSelector((state) => state.admin);
+  
+  // Local state
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedType, setSelectedType] = useState('All');
-  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [categories, setCategories] = useState([]);
 
   // Estados para el formulario de producto
   const [formData, setFormData] = useState({
@@ -30,10 +39,10 @@ function AdminPanel() {
     if (!isAdmin()) {
       navigate('/');
     } else {
-      fetchProducts();
-      fetchCategories();
+      dispatch(fetchProducts());
+      dispatch(fetchCategories(token));
     }
-  }, []);
+  }, [dispatch, token]);
 
   useEffect(() => {
     if (selectedType === 'All') {
@@ -46,54 +55,17 @@ function AdminPanel() {
     }
   }, [selectedType, products]);
 
-  const fetchProducts = async () => {
-    try {
-      console.log('Fetching products with token:', token ? 'Token exists' : 'No token');
-      
-      const response = await fetch('http://localhost:8080/products', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` }),
-        },
-      });
-      
-      console.log('Fetch products response status:', response.status);
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Products fetched:', data.length);
-        setProducts(data);
-        setFilteredProducts(data);
-      } else {
-        console.error('Error fetching products:', response.status, response.statusText);
-      }
-    } catch (error) {
-      console.error('Error al cargar productos:', error);
-    } finally {
-      setLoading(false);
+  // Mostrar mensajes de éxito/error
+  useEffect(() => {
+    if (successMessage) {
+      alert(successMessage);
+      dispatch(clearAdminMessages());
     }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const response = await fetch('http://localhost:8080/categories', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` }),
-        },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        const categoryList = data.content || data;
-        setCategories(categoryList);
-      }
-    } catch (error) {
-      console.error('Error al cargar categorías:', error);
+    if (adminError) {
+      alert(`Error: ${adminError}`);
+      dispatch(clearAdminMessages());
     }
-  };
+  }, [successMessage, adminError, dispatch]);
 
   const handleFilterChange = (type) => {
     setSelectedType(type);
@@ -167,38 +139,20 @@ function AdminPanel() {
     };
 
     try {
-      console.log('Submitting product:', productData);
-      console.log('Token:', token ? 'exists' : 'missing');
-      
-      const url = isEditing
-        ? `http://localhost:8080/products/${selectedProduct.id}`
-        : 'http://localhost:8080/products';
-      
-      const method = isEditing ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(productData),
-      });
-
-      console.log('Response status:', response.status);
-
-      if (response.ok) {
-        fetchProducts();
-        closeModal();
-        alert(isEditing ? 'Producto actualizado exitosamente' : 'Producto creado exitosamente');
+      if (isEditing) {
+        await dispatch(updateProduct({ 
+          productId: selectedProduct.id, 
+          productData, 
+          token 
+        })).unwrap();
       } else {
-        const errorText = await response.text();
-        console.error('Error response:', response.status, errorText);
-        alert(`Error al guardar el producto: ${response.status} - ${errorText}`);
+        await dispatch(createProduct({ productData, token })).unwrap();
       }
+      
+      dispatch(fetchProducts());
+      closeModal();
     } catch (error) {
       console.error('Error:', error);
-      alert('Error al guardar el producto: ' + error.message);
     }
   };
 
@@ -208,34 +162,14 @@ function AdminPanel() {
     }
 
     try {
-      console.log('Deleting product:', productId);
-      console.log('Token:', token ? 'exists' : 'missing');
-      
-      const response = await fetch(`http://localhost:8080/products/${productId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      console.log('Delete response status:', response.status);
-
-      if (response.ok) {
-        fetchProducts();
-        alert('Producto eliminado exitosamente');
-      } else {
-        const errorText = await response.text();
-        console.error('Delete error:', response.status, errorText);
-        alert(`Error al eliminar el producto: ${response.status}`);
-      }
+      await dispatch(deleteProduct({ productId, token })).unwrap();
+      dispatch(fetchProducts());
     } catch (error) {
       console.error('Error:', error);
-      alert('Error al eliminar el producto: ' + error.message);
     }
   };
 
-  if (loading) {
+  if (productsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-xl">Cargando...</div>
@@ -433,9 +367,10 @@ function AdminPanel() {
                 <div className="mt-6 flex space-x-4">
                   <button
                     type="submit"
-                    className="flex-1 bg-[#2d5d52] text-white px-4 py-2 rounded-lg hover:bg-[#2d5d52]/90 transition shadow-sm"
+                    disabled={adminLoading}
+                    className="flex-1 bg-[#2d5d52] text-white px-4 py-2 rounded-lg hover:bg-[#2d5d52]/90 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isEditing ? 'Actualizar' : 'Crear'} Producto
+                    {adminLoading ? 'Guardando...' : (isEditing ? 'Actualizar' : 'Crear')} Producto
                   </button>
                   <button
                     type="button"

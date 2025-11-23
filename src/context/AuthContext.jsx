@@ -1,4 +1,6 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout as logoutAction, setAuthFromStorage, loginUser } from '../redux/authSlice';
 
 const AuthContext = createContext();
 
@@ -11,9 +13,8 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  const { user, token, loading: authLoading, error } = useSelector((state) => state.auth);
 
   useEffect(() => {
     // Cargar usuario y token desde localStorage al iniciar
@@ -31,11 +32,14 @@ export const AuthProvider = ({ children }) => {
           console.log('Token expirado, limpiando localStorage...');
           localStorage.removeItem('token');
           localStorage.removeItem('user');
-          localStorage.removeItem('authToken'); // Por si acaso hay otro token
+          localStorage.removeItem('authToken');
+          dispatch(logoutAction());
         } else {
-          // Token válido
-          setToken(storedToken);
-          setUser(JSON.parse(storedUser));
+          // Token válido, restaurar desde localStorage
+          dispatch(setAuthFromStorage({
+            user: JSON.parse(storedUser),
+            token: storedToken
+          }));
         }
       } catch (error) {
         console.error('Error al validar token:', error);
@@ -43,57 +47,23 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         localStorage.removeItem('authToken');
+        dispatch(logoutAction());
       }
     }
-    setLoading(false);
-  }, []);
+  }, [dispatch]);
 
   const login = async (email, password) => {
     try {
-      const response = await fetch('http://localhost:8080/api/v1/auth/authenticate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Credenciales inválidas');
-      }
-
-      const data = await response.json();
-      const accessToken = data.access_token;
-
-      // Decodificar el token JWT para obtener el rol
-      const tokenPayload = JSON.parse(atob(accessToken.split('.')[1]));
-      
-      const userData = {
-        email: tokenPayload.sub,
-        role: tokenPayload.role || tokenPayload.authorities?.[0]?.replace('ROLE_', '') || 'USER',
-      };
-
-      setToken(accessToken);
-      setUser(userData);
-      
-      // Limpiar cualquier token viejo y guardar el nuevo
-      localStorage.clear();
-      localStorage.setItem('token', accessToken);
-      localStorage.setItem('user', JSON.stringify(userData));
-
-      return { success: true, user: userData };
+      const result = await dispatch(loginUser({ email, password })).unwrap();
+      return { success: true, user: result };
     } catch (error) {
       console.error('Error en login:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: error.message || 'Credenciales inválidas' };
     }
   };
 
   const logout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('authToken');
+    dispatch(logoutAction());
   };
 
   const isAdmin = () => {
@@ -106,7 +76,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     isAdmin,
-    loading,
+    loading: authLoading,
     isAuthenticated: !!user,
   };
 

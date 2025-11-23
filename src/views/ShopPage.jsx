@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProducts } from '../redux/productSlice';
 import FilterTabs from '../components/FilterTabs';
 import PriceFilter from '../components/PriceFilter';
 import ProductGrid from '../components/ProductGrid';
@@ -9,7 +11,11 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
 function ShopPage() {
-    const [allMates, setAllMates] = useState([]);
+    // Redux
+    const dispatch = useDispatch();
+    const { items: allMates, loading, error } = useSelector((state) => state.products);
+    
+    // Local state para filtros y UI
     const [filteredMates, setFilteredMates] = useState([]);
     const [selectedType, setSelectedType] = useState('All');
     const [priceRange, setPriceRange] = useState([0, 100000]);
@@ -18,8 +24,6 @@ function ShopPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const { addToCart } = useCart();
     const { isAuthenticated } = useAuth();
 
@@ -42,47 +46,22 @@ function ShopPage() {
         }
     }, [categoryFromUrl]);
 
-    // Configuración de la API
-    const API_URL = 'http://localhost:8080/products';
-
-    // Fetch de productos desde el backend
+    // Fetch de productos usando Redux
     useEffect(() => {
-        const fetchProductos = async () => {
-            try {
-                setLoading(true);
-                setError(null);
+        dispatch(fetchProducts());
+    }, [dispatch]);
 
-                const response = await fetch(API_URL, {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Error ${response.status}: ${response.statusText}`);
-                }
-
-                const data = await response.json();
-                setAllMates(data);
-                
-                // Calcular precios mínimo y máximo de los productos
-                if (data.length > 0) {
-                    const prices = data.map(product => product.price);
-                    const min = Math.floor(Math.min(...prices));
-                    const max = Math.ceil(Math.max(...prices));
-                    setMinPrice(min);
-                    setMaxPrice(max);
-                    setPriceRange([min, max]);
-                }
-            } catch (error) {
-                console.error('Error al cargar productos:', error);
-                setError(error.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchProductos();
-    }, []);
+    // Calcular precios mínimo y máximo cuando se cargan los productos
+    useEffect(() => {
+        if (allMates.length > 0) {
+            const prices = allMates.map(product => product.price);
+            const min = Math.floor(Math.min(...prices));
+            const max = Math.ceil(Math.max(...prices));
+            setMinPrice(min);
+            setMaxPrice(max);
+            setPriceRange([min, max]);
+        }
+    }, [allMates]);
 
     const handleFilterChange = (type) => {
         setSelectedType(type);
