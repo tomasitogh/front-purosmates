@@ -6,14 +6,21 @@ import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
 
+// Redux
+import { Provider } from 'react-redux';
+import { store } from './redux/store.js'; // Revisar que esto esté bien
+
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <AuthProvider>
-      <CartProvider>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </CartProvider>
-    </AuthProvider>
+    <Provider store={store}>
+      <AuthProvider>
+        <CartProvider>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </CartProvider>
+      </AuthProvider>
+    </Provider>
   </StrictMode>,
 )

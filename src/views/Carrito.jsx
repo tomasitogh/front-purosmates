@@ -2,12 +2,15 @@ import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { createOrder, clearOrderState } from "../redux/orderSlice";
 
 export default function Carrito() {
   const { items, removeItem, addToCart, decQty, totalPrice, totalQty, subtotal, discount, hasComboDiscount, clearCart } = useCart();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const { isAuthenticated, token } = useAuth();
+  const dispatch = useDispatch();
+  const { loading, success, error } = useSelector((state) => state.orders);
   const [showSuccess, setShowSuccess] = useState(false);
 
   // Redirigir si no está autenticado
@@ -17,54 +20,43 @@ export default function Carrito() {
     }
   }, [isAuthenticated, navigate]);
 
-  const handleConfirmarCompra = async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert('Debes iniciar sesión para realizar la compra');
-        navigate('/');
-        return;
-      }
-
-      // Preparar los items en el formato que espera el backend
-      const orderItems = items.map(item => ({
-        productId: item.id,
-        quantity: item.qty
-      }));
-
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(orderItems)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || 'Error al procesar la compra');
-      }
-
-      const order = await response.json();
-      
-      // Mostrar mensaje de éxito
+  // Manejar éxito de la orden
+  useEffect(() => {
+    if (success) {
       setShowSuccess(true);
       
       // Limpiar el carrito y redirigir después de 3 segundos
       setTimeout(() => {
         clearCart();
+        dispatch(clearOrderState());
         setShowSuccess(false);
         navigate('/');
       }, 3000);
-
-    } catch (error) {
-      console.error('Error al confirmar compra:', error);
-      alert(error.message || 'Error al procesar la compra. Por favor intenta nuevamente.');
-    } finally {
-      setLoading(false);
     }
+  }, [success, clearCart, dispatch, navigate]);
+
+  // Manejar errores
+  useEffect(() => {
+    if (error) {
+      alert(error || 'Error al procesar la compra. Por favor intenta nuevamente.');
+      dispatch(clearOrderState());
+    }
+  }, [error, dispatch]);
+
+  const handleConfirmarCompra = async () => {
+    if (!token) {
+      alert('Debes iniciar sesión para realizar la compra');
+      navigate('/');
+      return;
+    }
+
+    // Preparar los items en el formato que espera el backend
+    const orderItems = items.map(item => ({
+      productId: item.id,
+      quantity: item.qty
+    }));
+
+    dispatch(createOrder({ orderItems, token }));
   };
 
   // Modal de compra exitosa (PRIMERO verificar esto)
