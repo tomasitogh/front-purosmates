@@ -21,7 +21,7 @@ function AdminPanel() {
   
   // Local state
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [selectedType, setSelectedType] = useState('All');
+  const [selectedType, setSelectedType] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -47,11 +47,13 @@ function AdminPanel() {
   }, [dispatch, token]);
 
   useEffect(() => {
-    if (selectedType === 'All') {
+    // Si el array está vacío, mostramos todos.
+    // Si tiene elementos, filtramos los productos cuya categoría esté INCLUIDA en el array.
+    if (selectedType.length === 0) {
       setFilteredProducts(products);
     } else {
-      const filtered = products.filter(
-        (product) => product.category?.description === selectedType
+      const filtered = products.filter((product) => 
+        selectedType.includes(product.category?.description)
       );
       setFilteredProducts(filtered);
     }
