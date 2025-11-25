@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProducts } from '../redux/productSlice';
 import FilterTabs from '../components/FilterTabs';
 import PriceFilter from '../components/PriceFilter';
 import ProductGrid from '../components/ProductGrid';
@@ -9,17 +11,19 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
 function ShopPage() {
-    const [allMates, setAllMates] = useState([]);
+    // Redux
+    const dispatch = useDispatch();
+    const { items: allMates, loading, error } = useSelector((state) => state.products);
+    
+    // Local state para filtros y UI
     const [filteredMates, setFilteredMates] = useState([]);
-    const [selectedType, setSelectedType] = useState('All');
+    const [selectedType, setSelectedType] = useState([]);
     const [priceRange, setPriceRange] = useState([0, 100000]);
     const [minPrice, setMinPrice] = useState(0);
     const [maxPrice, setMaxPrice] = useState(100000);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const { addToCart } = useCart();
     const { isAuthenticated } = useAuth();
 
@@ -38,54 +42,29 @@ function ShopPage() {
     // Establecer la categoría desde la URL cuando cambie
     useEffect(() => {
         if (categoryFromUrl) {
-            setSelectedType(categoryFromUrl);
+            setSelectedType([categoryFromUrl]);
         }
     }, [categoryFromUrl]);
 
-    // Configuración de la API
-    const API_URL = 'http://localhost:8080/products';
-
-    // Fetch de productos desde el backend
+    // Fetch de productos usando Redux
     useEffect(() => {
-        const fetchProductos = async () => {
-            try {
-                setLoading(true);
-                setError(null);
+        dispatch(fetchProducts());
+    }, [dispatch]);
 
-                const response = await fetch(API_URL, {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' }
-                });
+    // Calcular precios mínimo y máximo cuando se cargan los productos
+    useEffect(() => {
+        if (allMates.length > 0) {
+            const prices = allMates.map(product => product.price);
+            const min = Math.floor(Math.min(...prices));
+            const max = Math.ceil(Math.max(...prices));
+            setMinPrice(min);
+            setMaxPrice(max);
+            setPriceRange([min, max]);
+        }
+    }, [allMates]);
 
-                if (!response.ok) {
-                    throw new Error(`Error ${response.status}: ${response.statusText}`);
-                }
-
-                const data = await response.json();
-                setAllMates(data);
-                
-                // Calcular precios mínimo y máximo de los productos
-                if (data.length > 0) {
-                    const prices = data.map(product => product.price);
-                    const min = Math.floor(Math.min(...prices));
-                    const max = Math.ceil(Math.max(...prices));
-                    setMinPrice(min);
-                    setMaxPrice(max);
-                    setPriceRange([min, max]);
-                }
-            } catch (error) {
-                console.error('Error al cargar productos:', error);
-                setError(error.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchProductos();
-    }, []);
-
-    const handleFilterChange = (type) => {
-        setSelectedType(type);
+    const handleFilterChange = (categories) => {
+        setSelectedType(categories);
     };
 
     const handlePriceChange = (newPriceRange) => {
@@ -94,10 +73,12 @@ function ShopPage() {
 
     // 🔎 aplicar filtros: categoría (tabs) + nombre (q) + precio
     useEffect(() => {
-        // 1) por categoría (tu lógica original)
-        let list = selectedType === 'All'
+        // 1) por categoría (múltiples selecciones)
+        let list = selectedType.length === 0
             ? allMates
-            : allMates.filter(mate => mate.category?.description === selectedType);
+            : allMates.filter(mate => 
+                selectedType.includes(mate.category?.description)
+            );
 
         // 2) por texto (nombre del producto)
         if (searchText) {
@@ -171,24 +152,36 @@ function ShopPage() {
 
     return (
         <div className="shop-page-container">
-            <div className="shop-layout-centered">
-                <div className="main-content">
-                    <h1 className="main-title-centered">Productos</h1> 
-                    <div className="filters-row">
-                        <FilterTabs 
-                            selectedType={selectedType}
-                            onFilterChange={handleFilterChange}
-                        />
-                        <PriceFilter 
-                            minPrice={minPrice}
-                            maxPrice={maxPrice}
-                            onPriceChange={handlePriceChange}
+            <div className="shop-layout-with-sidebar">
+                <aside className="shop-sidebar">
+                    <h3 className="sidebar-title">Filtros</h3>
+                    <FilterTabs 
+                        selectedType={selectedType}
+                        onFilterChange={handleFilterChange}
+                    />
+                    <PriceFilter 
+                        minPrice={minPrice}
+                        maxPrice={maxPrice}
+                        onPriceChange={handlePriceChange}
+                    />
+                </aside>
+                <div className="shop-content-wrapper">
+                    <div className="shop-main-content">
+                        <h1 className="main-title-centered">Productos</h1> 
+                        <ProductGrid 
+                            mates={filteredMates} 
+                            onProductClick={openProductModal} 
                         />
                     </div>
-                    <ProductGrid 
-                        mates={filteredMates} 
-                        onProductClick={openProductModal} 
-                    />
+
+                    {/* 👇 BANNER LATERAL - Solo cambiá la URL de la imagen */}
+                    <aside className="shop-sidebar-banner">
+                        <img 
+                            src="/banner-lateral.png" 
+                            alt="Banner publicitario" 
+                            className="sidebar-banner-img"
+                        />
+                    </aside>
                 </div>
             </div>
 

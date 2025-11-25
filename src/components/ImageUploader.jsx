@@ -1,10 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { X, Upload, Image as ImageIcon } from 'lucide-react';
+import { uploadFiles, clearUploadedFiles } from '../redux/fileSlice';
 
 function ImageUploader({ images = [], onChange, required = false, token }) {
   const [dragActive, setDragActive] = useState(false);
   const [previewUrls, setPreviewUrls] = useState(images);
-  const [uploading, setUploading] = useState(false);
+  const dispatch = useDispatch();
+  const { uploadedUrls, loading: uploading, error } = useSelector((state) => state.files);
+
+  // Actualizar previewUrls cuando se suben archivos exitosamente
+  useEffect(() => {
+    if (uploadedUrls.length > 0) {
+      const updatedUrls = [...previewUrls, ...uploadedUrls];
+      setPreviewUrls(updatedUrls);
+      onChange(updatedUrls);
+      dispatch(clearUploadedFiles());
+    }
+  }, [uploadedUrls]);
+
+  // Mostrar errores
+  useEffect(() => {
+    if (error) {
+      alert('Error al subir las imágenes: ' + error);
+      dispatch(clearUploadedFiles());
+    }
+  }, [error, dispatch]);
 
   const handleDrag = (e) => {
     e.preventDefault();
@@ -35,37 +56,7 @@ function ImageUploader({ images = [], onChange, required = false, token }) {
     
     if (imageFiles.length === 0) return;
 
-    setUploading(true);
-
-    try {
-      const formData = new FormData();
-      imageFiles.forEach(file => {
-        formData.append('files', file);
-      });
-
-      const response = await fetch('http://localhost:8080/files/upload-multiple', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const newUrls = data.fileUrls.map(url => `http://localhost:8080${url}`);
-        const updatedUrls = [...previewUrls, ...newUrls];
-        setPreviewUrls(updatedUrls);
-        onChange(updatedUrls);
-      } else {
-        alert('Error al subir las imágenes');
-      }
-    } catch (error) {
-      console.error('Error uploading files:', error);
-      alert('Error al subir las imágenes: ' + error.message);
-    } finally {
-      setUploading(false);
-    }
+    dispatch(uploadFiles({ files: imageFiles, token }));
   };
 
   const removeImage = (index) => {

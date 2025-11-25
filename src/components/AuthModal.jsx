@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { registerUser } from '../redux/authSlice';
 
 function AuthModal({ isOpen, onClose }) {
     const [isLogin, setIsLogin] = useState(true);
@@ -11,6 +13,8 @@ function AuthModal({ isOpen, onClose }) {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const { login: authLogin } = useAuth();
+    const dispatch = useDispatch();
+    const { loading } = useSelector((state) => state.auth);
     const navigate = useNavigate();
 
     if (!isOpen) return null;
@@ -104,70 +108,21 @@ function AuthModal({ isOpen, onClose }) {
             try {
                 console.log('Enviando registro con:', { firstname: name, lastname: lastname, email, role: 'USER' });
                 
-                const res = await fetch('http://localhost:8080/api/v1/auth/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        firstname: name,
-                        lastname: lastname,
-                        email: email,
-                        password: password,
-                        role: 'USER',
-                    }),
-                });
+                await dispatch(registerUser({
+                    firstname: name,
+                    lastname: lastname,
+                    email: email,
+                    password: password
+                })).unwrap();
 
-                console.log('Respuesta status:', res.status);
+                console.log('Registro exitoso');
 
-                if (!res.ok) {
-                    let errorMessage = 'Error en el registro';
-                    try {
-                        const errorData = await res.json();
-                        console.error('Error del servidor:', errorData);
-                        
-                        if (res.status === 409 || errorMessage.toLowerCase().includes('duplicate') || 
-                            errorMessage.toLowerCase().includes('already exists')) {
-                            errorMessage = 'El email o nombre de usuario ya está registrado. Por favor usa otro.';
-                        } else if (res.status === 400) {
-                            errorMessage = errorData.message || 'Datos inválidos. Verifica la información ingresada.';
-                        } else if (res.status === 500) {
-                            errorMessage = 'El email o nombre de usuario ya existe. Por favor usa otro.';
-                        }
-                    } catch {
-                        try {
-                            const text = await res.text();
-                            console.error('Error del servidor (text):', text);
-                            if (text.toLowerCase().includes('duplicate') || 
-                                text.toLowerCase().includes('constraint') ||
-                                text.toLowerCase().includes('unique')) {
-                                errorMessage = 'El email o nombre de usuario ya está registrado.';
-                            } else {
-                                errorMessage = text || errorMessage;
-                            }
-                        } catch {
-                            console.error('No se pudo leer el error del servidor');
-                        }
-                    }
-                    
-                    alert(errorMessage);
-                    return;
-                }
-
-                let data = {};
-                try { 
-                    data = await res.json();
-                    console.log('Registro exitoso:', data);
-                } catch (e) {
-                    console.log('Respuesta sin JSON, asumiendo éxito');
-                }
-
-                if (data.access_token) {
-                    // Si el registro devuelve un token, hacer login automático
-                    const result = await authLogin(email, password);
-                    if (result.success) {
-                        alert('¡Registro exitoso! Has sido logueado automáticamente.');
-                        onClose();
-                        navigate('/');
-                    }
+                // Intentar login automático
+                const result = await authLogin(email, password);
+                if (result.success) {
+                    alert('¡Registro exitoso! Has sido logueado automáticamente.');
+                    onClose();
+                    navigate('/');
                 } else {
                     alert('¡Registro exitoso! Por favor inicia sesión.');
                     setIsLogin(true);
@@ -180,8 +135,22 @@ function AuthModal({ isOpen, onClose }) {
                 setPassword('');
                 setConfirmPassword('');
             } catch (error) {
-                console.error('Error de red:', error);
-                alert('Error de red. ¿Está levantado el backend en localhost:8080?');
+                console.error('Error en registro:', error);
+                
+                let errorMessage = 'Error en el registro';
+                if (error.message) {
+                    if (error.message.toLowerCase().includes('duplicate') || 
+                        error.message.toLowerCase().includes('already exists') ||
+                        error.message.toLowerCase().includes('constraint') ||
+                        error.message.toLowerCase().includes('unique')) {
+                        errorMessage = 'El email o nombre de usuario ya está registrado. Por favor usa otro.';
+                    } else if (error.message.toLowerCase().includes('400')) {
+                        errorMessage = 'Datos inválidos. Verifica la información ingresada.';
+                    } else {
+                        errorMessage = error.message;
+                    }
+                }
+                alert(errorMessage);
             }
         }
     };
@@ -320,9 +289,10 @@ function AuthModal({ isOpen, onClose }) {
                             {/* Botón principal */}
                             <button
                                 onClick={handleSubmit}
-                                className="w-full bg-[#2d5d52] text-white py-3 rounded-lg font-semibold hover:bg-[#2d5d52]/90 transition-colors shadow-md hover:shadow-lg"
+                                disabled={loading}
+                                className="w-full bg-[#2d5d52] text-white py-3 rounded-lg font-semibold hover:bg-[#2d5d52]/90 transition-colors shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {isLogin ? 'Log In' : 'Registrarse'}
+                                {loading ? 'Procesando...' : (isLogin ? 'Log In' : 'Registrarse')}
                             </button>
 
                             {/* Línea divisoria */}
