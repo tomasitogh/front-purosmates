@@ -1,4 +1,5 @@
 import { useCart } from "../context/CartContext";
+import toast from 'react-hot-toast';
 
 export default function CartDrawer() {
   const { open, setOpen, items, addToCart, decQty, removeItem, clearCart, totalQty, totalPrice } = useCart();
@@ -55,7 +56,7 @@ export default function CartDrawer() {
           <div className="flex gap-2">
             <button onClick={clearCart} className="flex-1 border rounded-lg py-2">Vaciar</button>
             <button className="flex-1 bg-green-600 text-white rounded-lg py-2 hover:bg-green-700"
-              onClick={() => alert("Checkout pendiente de integrar con el back")}>
+              onClick={() => toast('Checkout pendiente de integrar con el back')}>
               Comprar
             </button>
           </div>

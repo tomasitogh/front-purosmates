@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import toast from 'react-hot-toast';
 
 const CartCtx = createContext(null);
 export const useCart = () => useContext(CartCtx);
@@ -17,7 +18,7 @@ export function CartProvider({ children }) {
   const addToCart = (product) => {
     // Verificar si el producto tiene stock
     if (!product.stock || product.stock <= 0) {
-      alert('Este producto no tiene stock disponible');
+      toast.error('Este producto no tiene stock disponible');
       return;
     }
 
@@ -26,7 +27,7 @@ export function CartProvider({ children }) {
       if (i >= 0) {
         // Verificar que no se exceda el stock disponible
         if (prev[i].qty >= product.stock) {
-          alert(`Solo hay ${product.stock} unidades disponibles de este producto`);
+          toast.error(`Solo hay ${product.stock} unidades disponibles de este producto`);
           return prev;
         }
         const copy = [...prev];
