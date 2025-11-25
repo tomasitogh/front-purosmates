@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createOrder, clearOrderState } from "../redux/orderSlice";
+import toast from 'react-hot-toast';
 
 export default function Carrito() {
   const { items, removeItem, addToCart, decQty, totalPrice, totalQty, subtotal, discount, hasComboDiscount, clearCart } = useCart();
@@ -38,14 +39,14 @@ export default function Carrito() {
   // Manejar errores
   useEffect(() => {
     if (error) {
-      alert(error || 'Error al procesar la compra. Por favor intenta nuevamente.');
+      toast.error(error || 'Error al procesar la compra. Por favor intenta nuevamente.');
       dispatch(clearOrderState());
     }
   }, [error, dispatch]);
 
   const handleConfirmarCompra = async () => {
     if (!token) {
-      alert('Debes iniciar sesión para realizar la compra');
+      toast.error('Debes iniciar sesión para realizar la compra');
       navigate('/');
       return;
     }

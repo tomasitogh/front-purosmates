@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { registerUser } from '../redux/authSlice';
+import toast from 'react-hot-toast';
 
 function AuthModal({ isOpen, onClose }) {
     const [isLogin, setIsLogin] = useState(true);
@@ -25,7 +26,7 @@ function AuthModal({ isOpen, onClose }) {
         if (isLogin) {
             // Login usando el AuthContext mejorado
             if (!email || !password) {
-                alert('Completa email y contraseña');
+                toast.error('Completa email y contraseña');
                 return;
             }
 
@@ -33,7 +34,7 @@ function AuthModal({ isOpen, onClose }) {
                 const result = await authLogin(email, password);
 
                 if (result.success) {
-                    alert('¡Login exitoso!');
+                    toast.success('¡Login exitoso!');
                     onClose();
                     
                     // Redirigir según el rol
@@ -47,61 +48,61 @@ function AuthModal({ isOpen, onClose }) {
                     setEmail('');
                     setPassword('');
                 } else {
-                    alert(result.error || 'Error en el login');
+                    toast.error(result.error || 'Error en el login');
                 }
             } catch (error) {
                 console.error('Error de red:', error);
-                alert('Error de red. ¿Está levantado el backend en localhost:8080?');
+                toast.error('Error de red. ¿Está levantado el backend en localhost:8080?');
             }
         } else {
             // Register
             if (!name || !lastname || !email || !password) {
-                alert('Completa nombre, apellido, email y contraseña');
+                toast.error('Completa nombre, apellido, email y contraseña');
                 return;
             }
             
             // Validación de nombre
             if (name.length < 2) {
-                alert('El nombre debe tener al menos 2 caracteres');
+                toast.error('El nombre debe tener al menos 2 caracteres');
                 return;
             }
             if (name.length > 50) {
-                alert('El nombre no puede tener más de 50 caracteres');
+                toast.error('El nombre no puede tener más de 50 caracteres');
                 return;
             }
             
             // Validación de apellido
             if (lastname.length < 2) {
-                alert('El apellido debe tener al menos 2 caracteres');
+                toast.error('El apellido debe tener al menos 2 caracteres');
                 return;
             }
             if (lastname.length > 50) {
-                alert('El apellido no puede tener más de 50 caracteres');
+                toast.error('El apellido no puede tener más de 50 caracteres');
                 return;
             }
             
             // Validación de email
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
-                alert('Por favor ingresa un email válido');
+                toast.error('Por favor ingresa un email válido');
                 return;
             }
             if (email.length > 100) {
-                alert('El email no puede tener más de 100 caracteres');
+                toast.error('El email no puede tener más de 100 caracteres');
                 return;
             }
             
             // Validación de contraseña
             if (password.length < 6) {
-                alert('La contraseña debe tener al menos 6 caracteres');
+                toast.error('La contraseña debe tener al menos 6 caracteres');
                 return;
             }
             if (password.length > 100) {
-                alert('La contraseña no puede tener más de 100 caracteres');
+                toast.error('La contraseña no puede tener más de 100 caracteres');
                 return;
             }
             if (password !== confirmPassword) {
-                alert('Las contraseñas no coinciden');
+                toast.error('Las contraseñas no coinciden');
                 return;
             }
 
@@ -120,11 +121,11 @@ function AuthModal({ isOpen, onClose }) {
                 // Intentar login automático
                 const result = await authLogin(email, password);
                 if (result.success) {
-                    alert('¡Registro exitoso! Has sido logueado automáticamente.');
+                    toast.success('¡Registro exitoso! Has sido logueado automáticamente.');
                     onClose();
                     navigate('/');
                 } else {
-                    alert('¡Registro exitoso! Por favor inicia sesión.');
+                    toast.success('¡Registro exitoso! Por favor inicia sesión.');
                     setIsLogin(true);
                 }
 
@@ -150,7 +151,7 @@ function AuthModal({ isOpen, onClose }) {
                         errorMessage = error.message;
                     }
                 }
-                alert(errorMessage);
+                toast.error(errorMessage);
             }
         }
     };

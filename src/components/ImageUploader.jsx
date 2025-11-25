@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { X, Upload, Image as ImageIcon } from 'lucide-react';
 import { uploadFiles, clearUploadedFiles } from '../redux/fileSlice';
+import toast from 'react-hot-toast';
 
 function ImageUploader({ images = [], onChange, required = false, token }) {
   const [dragActive, setDragActive] = useState(false);
@@ -22,7 +23,7 @@ function ImageUploader({ images = [], onChange, required = false, token }) {
   // Mostrar errores
   useEffect(() => {
     if (error) {
-      alert('Error al subir las imágenes: ' + error);
+      toast.error('Error al subir las imágenes: ' + error);
       dispatch(clearUploadedFiles());
     }
   }, [error, dispatch]);

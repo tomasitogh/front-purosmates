@@ -45,7 +45,7 @@ export default function Navbar() {
 
   return (
     <header className="bg-[#2d5d52] shadow-md">
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav className="w-full px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center gap-3">
@@ -68,91 +68,75 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-2">
-            <ul className="flex items-center gap-2">
-              <div className="hidden md:flex items-center space-x-6">
-                <ul className="flex items-center space-x-6">
-                  <li>
-                    <Link
-                      to="/"
-                      className="inline-flex items-center justify-center h-10 px-4 rounded-xl font-medium text-[#F5F5DC] border border-[#F5F5DC]/40 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:ring-offset-2 transition"
-                    >
-                      Productos
-                    </Link>
-                  </li>
+          <div className="hidden md:flex flex-row items-center gap-4 flex-wrap">
+            <Link
+              to="/"
+              className="inline-flex items-center justify-center h-10 px-4 rounded-xl font-medium text-[#F5F5DC] border border-[#F5F5DC]/40 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:ring-offset-2 transition"
+            >
+              Productos
+            </Link>
 
-                  {/* 🔎 Barra de búsqueda */}
-                  <li className="flex items-center">
-                    <form onSubmit={onSearchSubmit} className="flex items-center gap-2">
-                      <input
-                        type="search"
-                        value={q}
-                        onChange={(e) => setQ(e.target.value)}
-                        placeholder="Buscar productos…"
-                        aria-label="Buscar productos"
-                        className="w-56 rounded-md border border-gray-300 px-3 py-1.5 outline-none focus:ring-2 focus:ring-[#2d5d52]"
-                      />
-                      <button
-                        type="submit"
-                        className="bg-white/10 text-white px-3 py-1.5 rounded-md hover:bg-white/20 transition"
-                      >
-                        Buscar
-                      </button>
-                    </form>
-                  </li>
+            {/* 🔎 Barra de búsqueda */}
+            <form onSubmit={onSearchSubmit} className="flex items-center gap-2">
+              <input
+                type="search"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Buscar productos…"
+                aria-label="Buscar productos"
+                className="w-56 rounded-md border border-gray-300 px-3 py-1.5 outline-none focus:ring-2 focus:ring-[#2d5d52]"
+              />
+              <button
+                type="submit"
+                className="bg-white/10 text-white px-3 py-1.5 rounded-md hover:bg-white/20 transition"
+              >
+                Buscar
+              </button>
+            </form>
 
-                  <li>
-                    <button
-                      type="button"
-                      onClick={handleCartClick}
-                      className="inline-flex items-center justify-center h-10 px-4 rounded-xl font-medium text-white border border-white/60 bg-transparent hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 transition relative"
-                      aria-label="Ir al carrito"
-                    >
-                      🛒
-                      {totalQty > 0 && (
-                        <span className="absolute -top-2 -right-3 text-xs bg-green-600 text-white rounded-full w-5 h-5 grid place-items-center">
-                          {totalQty}
-                        </span>
-                      )}
-                    </button>
-                  </li>
+            <button
+              type="button"
+              onClick={handleCartClick}
+              className="inline-flex items-center justify-center h-10 px-4 rounded-xl font-medium text-white border border-white/60 bg-transparent hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 transition relative"
+              aria-label="Ir al carrito"
+            >
+              🛒
+              {totalQty > 0 && (
+                <span className="absolute -top-2 -right-3 text-xs bg-green-600 text-white rounded-full w-5 h-5 grid place-items-center">
+                  {totalQty}
+                </span>
+              )}
+            </button>
 
-                  {isAuthenticated && isAdmin() && (
-                    <li>
-                      <Link
-                        to="/admin"
-                        className="text-gray-700 hover:text-gray-900 transition font-medium"
-                      >
-                        🔧 Panel Admin
-                      </Link>
-                    </li>
-                  )}
+            {isAuthenticated && isAdmin() && (
+              <Link
+                to="/admin"
+                className="text-[#F5F5DC] hover:text-white transition font-medium"
+              >
+                🔧 Panel Admin
+              </Link>
+            )}
 
-                  <li>
-                    {isAuthenticated ? (
-                      <div className="flex items-center space-x-4">
-                        <span className="text-gray-700 font-medium">
-                          Hola, {user?.name || user?.email || 'Usuario'}
-                        </span>
-                        <button
-                          onClick={handleLogout}
-                          className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition shadow-sm"
-                        >
-                          Cerrar sesión
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => setIsAuthModalOpen(true)}
-                        className="inline-flex items-center justify-center h-10 px-4 rounded-xl font-medium text-white border border-white/60 bg-transparent hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 transition"
-                      >
-                        Login
-                      </button>
-                    )}
-                  </li>
-                </ul>
+            {isAuthenticated ? (
+              <div className="flex flex-row items-center gap-4 flex-wrap">
+                <span className="text-[#F5F5DC] font-medium">
+                  Hola, {user?.name || user?.email || 'Usuario'}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="bg-white/10 text-[#F5F5DC] px-4 py-2 rounded-lg hover:bg-white/20 transition shadow-sm"
+                >
+                  Cerrar sesión
+                </button>
               </div>
-            </ul>
+            ) : (
+              <button
+                onClick={() => setIsAuthModalOpen(true)}
+                className="inline-flex items-center justify-center h-10 px-4 rounded-xl font-medium text-white border border-white/60 bg-transparent hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 transition"
+              >
+                Login
+              </button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}

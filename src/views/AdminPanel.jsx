@@ -7,6 +7,7 @@ import { fetchCategories } from '../redux/categorySlice';
 import { createProduct, updateProduct, deleteProduct, clearAdminMessages } from '../redux/adminSlice';
 import FilterTabs from '../components/FilterTabs';
 import ImageUploader from '../components/ImageUploader';
+import toast from 'react-hot-toast';
 
 function AdminPanel() {
   const { user, token, logout, isAdmin } = useAuth();
@@ -20,7 +21,7 @@ function AdminPanel() {
   
   // Local state
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [selectedType, setSelectedType] = useState('All');
+  const [selectedType, setSelectedType] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -46,11 +47,13 @@ function AdminPanel() {
   }, [dispatch, token]);
 
   useEffect(() => {
-    if (selectedType === 'All') {
+    // Si el array está vacío, mostramos todos.
+    // Si tiene elementos, filtramos los productos cuya categoría esté INCLUIDA en el array.
+    if (selectedType.length === 0) {
       setFilteredProducts(products);
     } else {
-      const filtered = products.filter(
-        (product) => product.category?.description === selectedType
+      const filtered = products.filter((product) => 
+        selectedType.includes(product.category?.description)
       );
       setFilteredProducts(filtered);
     }
@@ -59,11 +62,11 @@ function AdminPanel() {
   // Mostrar mensajes de éxito/error
   useEffect(() => {
     if (successMessage) {
-      alert(successMessage);
+      toast.success(successMessage);
       dispatch(clearAdminMessages());
     }
     if (adminError) {
-      alert(`Error: ${adminError}`);
+      toast.error(`Error: ${adminError}`);
       dispatch(clearAdminMessages());
     }
   }, [successMessage, adminError, dispatch]);
@@ -125,12 +128,12 @@ function AdminPanel() {
     e.preventDefault();
 
     if (!formData.imageUrls || formData.imageUrls.length === 0) {
-      alert('Debes subir al menos una imagen del producto');
+      toast.error('Debes subir al menos una imagen del producto');
       return;
     }
 
     if (!formData.categoryId) {
-      alert('Debes seleccionar una categoría');
+      toast.error('Debes seleccionar una categoría');
       return;
     }
 
@@ -196,10 +199,10 @@ function AdminPanel() {
       // Refrescar lista de productos desde Redux (admin)
       dispatch(fetchAllProductsAdmin(token));
       
-      alert(`Producto ${newActiveState ? 'activado' : 'inactivado'} exitosamente`);
+      toast.success(`Producto ${newActiveState ? 'activado' : 'inactivado'} exitosamente`);
     } catch (error) {
       console.error('Error:', error);
-      alert(`Error al ${action} el producto: ` + error.message);
+      toast.error(`Error al ${action} el producto: ` + error.message);
     }
   };
 
