@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { selectCartTotalQty } from '../redux/cartSlice';
 import AuthModal from './AuthModal';
 import { useAuth } from '../context/AuthContext';
-import { useCart } from "../context/CartContext";
 import logoPM from '../assets/logo-purosmates.png';
 
 export default function Navbar() {
@@ -11,7 +12,7 @@ export default function Navbar() {
   const [q, setQ] = useState("");
 
   const { user, isAuthenticated, logout, isAdmin } = useAuth();
-  const { totalQty } = useCart();
+  const totalQty = useSelector(selectCartTotalQty);
   const navigate = useNavigate();
   const location = useLocation();
 

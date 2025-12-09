@@ -1,4 +1,3 @@
-// Acá vamos a almacenar nuestro gran estado global y nos ahorra toda la parte de middleware
 import { configureStore } from "@reduxjs/toolkit";
 import productReducer from "./productSlice";
 import authReducer from "./authSlice";
@@ -6,6 +5,7 @@ import categoryReducer from "./categorySlice";
 import adminReducer from "./adminSlice";
 import orderReducer from "./orderSlice";
 import fileReducer from "./fileSlice";
+import cartReducer from "./cartSlice";
 
 export const store = configureStore({
     reducer: {
@@ -14,6 +14,13 @@ export const store = configureStore({
         categories: categoryReducer,
         admin: adminReducer,
         orders: orderReducer,
-        files: fileReducer
+        files: fileReducer,
+        cart: cartReducer
     }
-})
+});
+
+// Subscribe to store updates to persist cart items
+store.subscribe(() => {
+    const state = store.getState();
+    localStorage.setItem('cart_items', JSON.stringify(state.cart.items));
+});

@@ -2,19 +2,19 @@ import { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts } from '../redux/productSlice';
+import { addToCart } from '../redux/cartSlice';
 import FilterTabs from '../components/FilterTabs';
 import PriceFilter from '../components/PriceFilter';
 import ProductGrid from '../components/ProductGrid';
 import ProductModal from '../components/ProductModal';
 import AuthModal from '../components/AuthModal';
-import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
 function ShopPage() {
     // Redux
     const dispatch = useDispatch();
     const { items: allMates, loading, error } = useSelector((state) => state.products);
-    
+
     // Local state para filtros y UI
     const [filteredMates, setFilteredMates] = useState([]);
     const [selectedType, setSelectedType] = useState([]);
@@ -24,7 +24,9 @@ function ShopPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
-    const { addToCart } = useCart();
+    // We will use dispatch(addToCart(product)) directly.
+    // I need to import it at the top.
+
     const { isAuthenticated } = useAuth();
 
     // 👇 leer querystring (?q=... y ?category=...)
@@ -76,7 +78,7 @@ function ShopPage() {
         // 1) por categoría (múltiples selecciones)
         let list = selectedType.length === 0
             ? allMates
-            : allMates.filter(mate => 
+            : allMates.filter(mate =>
                 selectedType.includes(mate.category?.description)
             );
 
@@ -88,7 +90,7 @@ function ShopPage() {
         }
 
         // 3) por rango de precio
-        list = list.filter(m => 
+        list = list.filter(m =>
             m.price >= priceRange[0] && m.price <= priceRange[1]
         );
 
@@ -120,8 +122,8 @@ function ShopPage() {
             category: product.category,
             stock: product.stock,
         };
-        
-        addToCart(cartItem);
+
+        dispatch(addToCart(cartItem));
         closeProductModal();
     };
 
@@ -143,7 +145,7 @@ function ShopPage() {
                 <div className="shop-layout-centered">
                     <div className="main-content">
                         <h1 className="main-title-centered">Error al cargar productos</h1>
-                        <p style={{textAlign: 'center', color: 'red'}}>{error}</p>
+                        <p style={{ textAlign: 'center', color: 'red' }}>{error}</p>
                     </div>
                 </div>
             </div>
@@ -155,11 +157,11 @@ function ShopPage() {
             <div className="shop-layout-with-sidebar">
                 <aside className="shop-sidebar">
                     <h3 className="sidebar-title">Filtros</h3>
-                    <FilterTabs 
+                    <FilterTabs
                         selectedType={selectedType}
                         onFilterChange={handleFilterChange}
                     />
-                    <PriceFilter 
+                    <PriceFilter
                         minPrice={minPrice}
                         maxPrice={maxPrice}
                         onPriceChange={handlePriceChange}
@@ -167,18 +169,18 @@ function ShopPage() {
                 </aside>
                 <div className="shop-content-wrapper">
                     <div className="shop-main-content">
-                        <h1 className="main-title-centered">Productos</h1> 
-                        <ProductGrid 
-                            mates={filteredMates} 
-                            onProductClick={openProductModal} 
+                        <h1 className="main-title-centered">Productos</h1>
+                        <ProductGrid
+                            mates={filteredMates}
+                            onProductClick={openProductModal}
                         />
                     </div>
 
                     {/* 👇 BANNER LATERAL - Solo cambiá la URL de la imagen */}
                     <aside className="shop-sidebar-banner">
-                        <img 
-                            src="/banner-lateral.png" 
-                            alt="Banner publicitario" 
+                        <img
+                            src="/banner-lateral.png"
+                            alt="Banner publicitario"
                             className="sidebar-banner-img"
                         />
                     </aside>
@@ -186,15 +188,15 @@ function ShopPage() {
             </div>
 
             {isModalOpen && (
-                <ProductModal 
-                    product={selectedProduct} 
-                    onClose={closeProductModal} 
+                <ProductModal
+                    product={selectedProduct}
+                    onClose={closeProductModal}
                     onAddToCart={handleAddToCart}
                 />
             )}
 
             {isAuthModalOpen && (
-                <AuthModal 
+                <AuthModal
                     isOpen={isAuthModalOpen}
                     onClose={() => setIsAuthModalOpen(false)}
                 />
