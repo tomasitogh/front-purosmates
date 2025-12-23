@@ -1,5 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+
 import toast from 'react-hot-toast';
+import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1';
 
 // Helper to get initial state from localStorage
 const getInitialCart = () => {
@@ -40,6 +44,50 @@ export const addToCart = createAsyncThunk(
 
     // Si pasa las validaciones, retornamos el producto para que el reducer lo agregue
     return product;
+  }
+);
+
+// Async Thunk for creating order
+export const createOrder = createAsyncThunk(
+  'cart/createOrder',
+  async ({ items, token }, { rejectWithValue }) => {
+    try {
+      // Formatear items para el backend: [{ productId: 1, quantity: 2 }, ...]
+      const orderItems = items.map(item => ({
+        productId: item.id,
+        quantity: item.qty
+      }));
+
+      const response = await axios.post(`${API_URL}/orders`, orderItems, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return response.data; // Retorna el OrderResponseDTO con el ID
+    } catch (error) {
+      if (error.response && error.response.data) {
+        return rejectWithValue(error.response.data);
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
+  }
+);
+
+// Async Thunk for creating MP Preference
+export const createPreference = createAsyncThunk(
+  'cart/createPreference',
+  async ({ orderId, token }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_URL}/mp/create_preference/${orderId}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return response.data; // Retorna el Preference ID (String)
+    } catch (error) {
+       if (error.response && error.response.data) {
+        return rejectWithValue(error.response.data);
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
   }
 );
 
@@ -87,6 +135,31 @@ const cartSlice = createSlice({
         // toast.success('Producto agregado'); // Opcional, si queremos feedback positivo
       })
       .addCase(addToCart.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload;
+      })
+      // Create Order
+      .addCase(createOrder.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(createOrder.fulfilled, (state) => {
+        state.status = 'succeeded';
+        state.items = []; // Vaciar carrito al comprar
+        localStorage.removeItem('cart_items');
+      })
+      .addCase(createOrder.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload;
+      })
+      // Create Preference (Mercado Pago)
+      .addCase(createPreference.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(createPreference.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        // No limpiamos el carrito aquí, se limpia al volver de MP o al crear la orden si fuera efectivo
+      })
+      .addCase(createPreference.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;
       });

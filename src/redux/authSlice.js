@@ -22,11 +22,12 @@ export const loginUser = createAsyncThunk('auth/login', async ({ email, password
 });
 
 // Thunk para registro
-export const registerUser = createAsyncThunk('auth/register', async ({ firstname, lastname, email, password }) => {
+    export const registerUser = createAsyncThunk('auth/register', async ({ firstname, lastname, email, phoneNumber, password }) => {
     const { data } = await axios.post(`${API_URL}/register`, {
         firstname,
         lastname,
         email,
+        phoneNumber,
         password,
         role: 'USER'
     });

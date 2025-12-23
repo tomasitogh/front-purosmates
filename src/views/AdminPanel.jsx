@@ -7,19 +7,21 @@ import { fetchCategories } from '../redux/categorySlice';
 import { createProduct, updateProduct, deleteProduct, clearAdminMessages } from '../redux/adminSlice';
 import FilterTabs from '../components/FilterTabs';
 import ImageUploader from '../components/ImageUploader';
+import OrdersPanel from '../components/OrdersPanel';
 import toast from 'react-hot-toast';
 
 function AdminPanel() {
   const { user, token, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
   // Redux state
   const { items: products, loading: productsLoading } = useSelector((state) => state.products);
   const { items: categories } = useSelector((state) => state.categories);
   const { loading: adminLoading, error: adminError, successMessage } = useSelector((state) => state.admin);
-  
+
   // Local state
+  const [activeTab, setActiveTab] = useState('products'); // 'products' | 'orders'
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedType, setSelectedType] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -52,7 +54,7 @@ function AdminPanel() {
     if (selectedType.length === 0) {
       setFilteredProducts(products);
     } else {
-      const filtered = products.filter((product) => 
+      const filtered = products.filter((product) =>
         selectedType.includes(product.category?.description)
       );
       setFilteredProducts(filtered);
@@ -151,15 +153,15 @@ function AdminPanel() {
 
     try {
       if (isEditing) {
-        await dispatch(updateProduct({ 
-          productId: selectedProduct.id, 
-          productData, 
-          token 
+        await dispatch(updateProduct({
+          productId: selectedProduct.id,
+          productData,
+          token
         })).unwrap();
       } else {
         await dispatch(createProduct({ productData, token })).unwrap();
       }
-      
+
       dispatch(fetchAllProductsAdmin(token));
       closeModal();
     } catch (error) {
@@ -172,7 +174,7 @@ function AdminPanel() {
     const currentState = product.active !== false;
     const newActiveState = !currentState;
     const action = newActiveState ? 'activar' : 'inactivar';
-    
+
     if (!confirm(`¿Estás seguro de que deseas ${action} este producto?`)) {
       return;
     }
@@ -190,15 +192,15 @@ function AdminPanel() {
         active: newActiveState,
       };
 
-      await dispatch(updateProduct({ 
-        productId: product.id, 
-        productData, 
-        token 
+      await dispatch(updateProduct({
+        productId: product.id,
+        productData,
+        token
       })).unwrap();
-      
+
       // Refrescar lista de productos desde Redux (admin)
       dispatch(fetchAllProductsAdmin(token));
-      
+
       toast.success(`Producto ${newActiveState ? 'activado' : 'inactivado'} exitosamente`);
     } catch (error) {
       console.error('Error:', error);
@@ -230,109 +232,138 @@ function AdminPanel() {
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6 flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-900">Gestión de Productos</h2>
-          <button
-            onClick={openCreateModal}
-            className="bg-[#2d5d52] text-white px-6 py-2 rounded-lg hover:bg-[#2d5d52]/90 transition font-medium shadow-sm"
-          >
-            + Agregar Producto
-          </button>
-        </div>
-
-        <FilterTabs
-          selectedType={selectedType}
-          onFilterChange={handleFilterChange}
-        />
-
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredProducts.map((product) => (
-            <div
-              key={product.id}
-              className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition ${
-                product.active === false ? 'opacity-60 border-2 border-gray-300' : ''
-              }`}
-            >
-              {/* Badge de estado */}
-              <div className="relative">
-                <div className="h-48 bg-gray-200 flex items-center justify-center overflow-hidden">
-                  {product.imageUrls && product.imageUrls.length > 0 ? (
-                    <img
-                      src={product.imageUrls[0]}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-gray-400">Sin imagen</span>
-                  )}
-                </div>
-                {product.active === false && (
-                  <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-                    INACTIVO
-                  </div>
-                )}
-                {product.stock === 0 && (
-                  <div className="absolute top-2 left-2 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-                    SIN STOCK
-                  </div>
-                )}
-              </div>
-              
-              <div className="p-4">
-                <h3 className="font-semibold text-lg text-gray-900 mb-2">
-                  {product.name}
-                </h3>
-                <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                  {product.description}
-                </p>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-green-600 font-bold">
-                    ${product.price.toLocaleString('es-AR')}
-                  </span>
-                  <span className="text-sm text-gray-600">
-                    Stock: {product.stock}
-                  </span>
-                </div>
-                <div className="text-xs text-gray-500 mb-4">
-                  Categoría: {product.category?.description || 'Sin categoría'}
-                </div>
-                
-                {/* Botones de acción */}
-                <div className="space-y-2">
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => openEditModal(product)}
-                      className="flex-1 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition text-sm shadow-sm"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => handleDelete(product.id)}
-                      className="flex-1 bg-red-50 text-red-600 px-3 py-2 rounded-lg hover:bg-red-100 transition text-sm shadow-sm"
-                    >
-                      Eliminar
-                    </button>
-                  </div>
-                  <button
-                    onClick={() => handleToggleActive(product)}
-                    className={`w-full px-3 py-2 rounded-lg transition text-sm font-medium shadow-sm ${
-                      product.active === false
-                        ? 'bg-green-50 text-green-700 hover:bg-green-100'
-                        : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
-                    }`}
-                  >
-                    {product.active === false ? '✓ Activar' : '✕ Inactivar'}
-                  </button>
-                </div>
-              </div>
+        <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 md:mb-0">Gestión de Tienda</h2>
+            <div className="flex space-x-4 mt-2">
+              <button
+                onClick={() => setActiveTab('products')}
+                className={`px-4 py-2 font-medium rounded-lg transition ${activeTab === 'products'
+                  ? 'bg-[#2d5d52] text-white shadow-md'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+              >
+                Productos
+              </button>
+              <button
+                onClick={() => setActiveTab('orders')}
+                className={`px-4 py-2 font-medium rounded-lg transition ${activeTab === 'orders'
+                  ? 'bg-[#2d5d52] text-white shadow-md'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+              >
+                Pedidos
+              </button>
             </div>
-          ))}
+          </div>
+
+          {activeTab === 'products' && (
+            <button
+              onClick={openCreateModal}
+              className="bg-[#2d5d52] text-white px-6 py-2 rounded-lg hover:bg-[#2d5d52]/90 transition font-medium shadow-sm"
+            >
+              + Agregar Producto
+            </button>
+          )}
         </div>
 
-        {filteredProducts.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">No hay productos disponibles</p>
-          </div>
+        {activeTab === 'products' ? (
+          <>
+            <FilterTabs
+              selectedType={selectedType}
+              onFilterChange={handleFilterChange}
+            />
+
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredProducts.map((product) => (
+                <div
+                  key={product.id}
+                  className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition ${product.active === false ? 'opacity-60 border-2 border-gray-300' : ''
+                    }`}
+                >
+                  {/* Badge de estado */}
+                  <div className="relative">
+                    <div className="h-48 bg-gray-200 flex items-center justify-center overflow-hidden">
+                      {product.imageUrls && product.imageUrls.length > 0 ? (
+                        <img
+                          src={product.imageUrls[0]}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-gray-400">Sin imagen</span>
+                      )}
+                    </div>
+                    {product.active === false && (
+                      <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                        INACTIVO
+                      </div>
+                    )}
+                    {product.stock === 0 && (
+                      <div className="absolute top-2 left-2 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                        SIN STOCK
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-4">
+                    <h3 className="font-semibold text-lg text-gray-900 mb-2">
+                      {product.name}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                      {product.description}
+                    </p>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-green-600 font-bold">
+                        ${product.price.toLocaleString('es-AR')}
+                      </span>
+                      <span className="text-sm text-gray-600">
+                        Stock: {product.stock}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-500 mb-4">
+                      Categoría: {product.category?.description || 'Sin categoría'}
+                    </div>
+
+                    {/* Botones de acción */}
+                    <div className="space-y-2">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => openEditModal(product)}
+                          className="flex-1 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition text-sm shadow-sm"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => handleDelete(product.id)}
+                          className="flex-1 bg-red-50 text-red-600 px-3 py-2 rounded-lg hover:bg-red-100 transition text-sm shadow-sm"
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                      <button
+                        onClick={() => handleToggleActive(product)}
+                        className={`w-full px-3 py-2 rounded-lg transition text-sm font-medium shadow-sm ${product.active === false
+                          ? 'bg-green-50 text-green-700 hover:bg-green-100'
+                          : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
+                          }`}
+                      >
+                        {product.active === false ? '✓ Activar' : '✕ Inactivar'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {filteredProducts.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-gray-500 text-lg">No hay productos disponibles</p>
+              </div>
+            )}
+          </>
+        ) : (
+          <OrdersPanel />
         )}
       </main>
 
@@ -344,7 +375,7 @@ function AdminPanel() {
               <h2 className="text-2xl font-bold mb-6">
                 {isEditing ? 'Editar Producto' : 'Crear Nuevo Producto'}
               </h2>
-              
+
               <form onSubmit={handleSubmit}>
                 <div className="space-y-4">
                   <div>

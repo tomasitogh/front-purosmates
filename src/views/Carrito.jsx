@@ -3,19 +3,20 @@ import {
   addToCart,
   decrementItem,
   removeItem,
-  clearCart,
   selectCartItems,
   selectCartTotalQty,
   selectCartTotalPrice,
   selectCartSubtotal,
   selectCartDiscount,
-  selectHasComboDiscount
+  selectHasComboDiscount,
+  createOrder,
+  createPreference
 } from "../redux/cartSlice";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useEffect, useState } from "react";
-import { createOrder, clearOrderState } from "../redux/orderSlice";
+import { useState } from "react";
 import toast from 'react-hot-toast';
+import PaymentMethodModal from "../components/PaymentMethodModal";
 
 export default function Carrito() {
   const dispatch = useDispatch();
@@ -28,74 +29,57 @@ export default function Carrito() {
 
   const navigate = useNavigate();
   const { isAuthenticated, token } = useAuth();
-  const { loading, success, error } = useSelector((state) => state.orders);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
-  // Redirigir si no está autenticado
-  useEffect(() => {
+  const handleCheckoutClick = () => {
     if (!isAuthenticated) {
-      navigate('/');
-    }
-  }, [isAuthenticated, navigate]);
-
-  // Manejar éxito de la orden
-  useEffect(() => {
-    if (success) {
-      setShowSuccess(true);
-
-      // Limpiar el carrito y redirigir después de 3 segundos
-      setTimeout(() => {
-        dispatch(clearCart());
-        dispatch(clearOrderState());
-        setShowSuccess(false);
-        navigate('/');
-      }, 3000);
-    }
-  }, [success, dispatch, navigate]);
-
-  // Manejar errores
-  useEffect(() => {
-    if (error) {
-      toast.error(error || 'Error al procesar la compra. Por favor intenta nuevamente.');
-      dispatch(clearOrderState());
-    }
-  }, [error, dispatch]);
-
-  const handleConfirmarCompra = async () => {
-    if (!token) {
       toast.error('Debes iniciar sesión para realizar la compra');
-      navigate('/');
+      navigate('/'); // O abrir AuthModal si tuviéramos acceso a setIsAuthModalOpen aquí
       return;
     }
-
-    // Preparar los items en el formato que espera el backend
-    const orderItems = items.map(item => ({
-      productId: item.id,
-      quantity: item.qty
-    }));
-
-    dispatch(createOrder({ orderItems, token }));
+    setIsPaymentModalOpen(true);
   };
 
-  // Modal de compra exitosa (PRIMERO verificar esto)
-  if (showSuccess) {
-    return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-8 max-w-md mx-4 text-center">
-          <div className="mb-4">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-          </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">¡Compra Exitosa!</h2>
-          <p className="text-gray-600 mb-4">Tu pedido ha sido procesado correctamente</p>
-          <p className="text-sm text-gray-500">Serás redirigido a la tienda...</p>
-        </div>
-      </div>
-    );
-  }
+  const handlePaymentSelection = async (method) => {
+    setIsPaymentModalOpen(false);
+
+    try {
+      // createOrder espera { items, token }
+      // y se encarga de formatear y llamar a la API
+      const resultAction = await dispatch(createOrder({ items, token }));
+
+      if (createOrder.fulfilled.match(resultAction)) {
+        const order = resultAction.payload;
+
+        if (method === 'cash') {
+          // WhatsApp Logic
+          const phoneNumber = '5491130548207';
+          const message = `Hola, tengo la orden #${order.id} y quiero pagar en efectivo.`;
+          const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+
+          window.open(whatsappUrl, '_blank');
+          toast.success('Orden creada. Redirigiendo a WhatsApp...');
+          // Al vaciarse el carrito (por createOrder.fulfilled), el componente renderizará "Carrito vacío"
+        } else {
+          // Mercado Pago Logic
+          toast.loading('Generando pago...');
+          const prefResult = await dispatch(createPreference({ orderId: order.id, token }));
+
+          if (createPreference.fulfilled.match(prefResult)) {
+            const initPoint = prefResult.payload;
+            window.location.href = initPoint;
+          } else {
+            toast.error('Error al generar pago con Mercado Pago');
+          }
+        }
+      } else {
+        toast.error('Error al crear la orden: ' + (resultAction.payload || 'Error desconocido'));
+      }
+    } catch (error) {
+      toast.error('Ocurrió un error inesperado');
+      console.error(error);
+    }
+  };
 
   if (totalQty === 0) {
     return (
@@ -210,11 +194,10 @@ export default function Carrito() {
             </div>
 
             <button
-              onClick={handleConfirmarCompra}
-              disabled={loading}
-              className="w-full bg-[#D4AF37] text-[#2d5d52] px-6 py-3 rounded-lg hover:bg-[#DAA520] transition font-semibold mb-3 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={handleCheckoutClick}
+              className="w-full bg-[#D4AF37] text-[#2d5d52] px-6 py-3 rounded-lg hover:bg-[#DAA520] transition font-semibold mb-3"
             >
-              {loading ? 'Procesando...' : 'Confirmar carrito'}
+              Confirmar carrito
             </button>
 
             <button
@@ -226,6 +209,12 @@ export default function Carrito() {
           </div>
         </div>
       </div>
+
+      <PaymentMethodModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        onSelectMethod={handlePaymentSelection}
+      />
     </div>
   );
 }

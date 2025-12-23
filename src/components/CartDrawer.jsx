@@ -8,9 +8,15 @@ import {
   selectCartOpen,
   selectCartItems,
   selectCartTotalQty,
-  selectCartTotalPrice
+  selectCartTotalPrice,
+  createOrder,
+  createPreference
 } from "../redux/cartSlice";
 import toast from 'react-hot-toast';
+import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import PaymentMethodModal from './PaymentMethodModal';
+import AuthModal from './AuthModal';
 
 export default function CartDrawer() {
   const dispatch = useDispatch();
@@ -19,7 +25,58 @@ export default function CartDrawer() {
   const totalQty = useSelector(selectCartTotalQty);
   const totalPrice = useSelector(selectCartTotalPrice);
 
+  const { token, isAuthenticated } = useAuth();
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
   const handleClose = () => dispatch(setCartOpen(false));
+
+  const handleCheckoutClick = () => {
+    if (!isAuthenticated) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    setIsPaymentModalOpen(true);
+  };
+
+  const handlePaymentSelection = async (method) => {
+    setIsPaymentModalOpen(false);
+
+    try {
+      const resultAction = await dispatch(createOrder({ items, token }));
+
+      if (createOrder.fulfilled.match(resultAction)) {
+        const order = resultAction.payload;
+
+        if (method === 'cash') {
+          // WhatsApp Logic
+          const phoneNumber = '5491130548207';
+          const message = `Hola, tengo la orden #${order.id} y quiero pagar en efectivo.`;
+          const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+
+          window.open(whatsappUrl, '_blank');
+          toast.success('Orden creada. Redirigiendo a WhatsApp...');
+          handleClose(); // Cerrar carrito
+        } else {
+          // Mercado Pago Logic
+          toast.loading('Generando pago...');
+          const prefResult = await dispatch(createPreference({ orderId: order.id, token }));
+
+          if (createPreference.fulfilled.match(prefResult)) {
+            const initPoint = prefResult.payload; // El backend ahora devuelve la URL directa
+            window.location.href = initPoint;
+          } else {
+            toast.error('Error al generar pago con Mercado Pago');
+          }
+        }
+      } else {
+        toast.error('Error al crear la orden: ' + (resultAction.payload || 'Error desconocido'));
+      }
+    } catch (error) {
+      toast.error('Ocurrió un error inesperado');
+      console.error(error);
+    }
+  };
 
   return (
     <>
@@ -73,12 +130,23 @@ export default function CartDrawer() {
           <div className="flex gap-2">
             <button onClick={() => dispatch(clearCart())} className="flex-1 border rounded-lg py-2">Vaciar</button>
             <button className="flex-1 bg-green-600 text-white rounded-lg py-2 hover:bg-green-700"
-              onClick={() => toast('Checkout pendiente de integrar con el back')}>
+              onClick={handleCheckoutClick}>
               Comprar
             </button>
           </div>
         </div>
       </aside>
+
+      <PaymentMethodModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        onSelectMethod={handlePaymentSelection}
+      />
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
     </>
   );
 }

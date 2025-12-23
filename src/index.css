@@ -740,6 +740,24 @@ button:focus-visible {
     box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
 }
 
+@media (max-width: 768px) {
+    .filter-tabs-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .filter-tabs {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .filter-tab-button {
+        width: 100%;
+        text-align: center;
+    }
+}
+
 /* ================================================= */
 /* ESTILOS DE LA MODAL DE PRODUCTO */
 /* ================================================= */
